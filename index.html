@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="dark" lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <title>Heritage of Amir Timur</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#b5c4ff",
+                        "on-primary": "#00287d",
+                        "surface-container-highest": "#2d3449",
+                        "surface": "#0b1326",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003732",
+                        "on-secondary-fixed": "#00201d",
+                        "secondary-container": "#00c6b6",
+                        "surface-bright": "#31394d",
+                        "inverse-surface": "#dae2fd",
+                        "primary-fixed": "#dce1ff",
+                        "on-secondary-fixed-variant": "#005049",
+                        "surface-container-low": "#131b2e",
+                        "on-surface-variant": "#c4c5d5",
+                        "surface-dim": "#0b1326",
+                        "outline-variant": "#444653",
+                        "tertiary": "#e9c400",
+                        "secondary-fixed": "#61f9e9",
+                        "primary-fixed-dim": "#b5c4ff",
+                        "on-error": "#690005",
+                        "tertiary-container": "#c9a900",
+                        "on-secondary-container": "#004c46",
+                        "on-primary-fixed": "#00164e",
+                        "background": "#0b1326",
+                        "outline": "#8e909e",
+                        "surface-container-lowest": "#060e20",
+                        "secondary-fixed-dim": "#3adccc",
+                        "on-tertiary-fixed-variant": "#544600",
+                        "inverse-on-surface": "#283044",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#43e2d2",
+                        "surface-container": "#171f33",
+                        "tertiary-fixed-dim": "#e9c400",
+                        "surface-variant": "#2d3449",
+                        "primary": "#b5c4ff",
+                        "error-container": "#93000a",
+                        "primary-container": "#003399",
+                        "on-primary-fixed-variant": "#153ea3",
+                        "inverse-primary": "#3557bc",
+                        "on-surface": "#dae2fd",
+                        "tertiary-fixed": "#ffe16d",
+                        "on-tertiary-fixed": "#221b00",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#3a3000",
+                        "on-primary-container": "#8aa4ff",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary-container": "#4c3e00"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"],
+                        "notoSerif": ["Noto Serif", "serif"],
+                        "manrope": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body h-screen flex flex-col overflow-hidden relative">
+    
+    <!-- Background Design -->
+    <div class="fixed inset-0 arabesque-pattern pointer-events-none z-[-2]"></div>
+    <div class="fixed top-0 left-0 w-full h-1/4 imperial-header-gradient opacity-60 pointer-events-none z-[-1]"></div>
+
+    <!-- Onboarding Screen -->
+    <div id="screen-onboarding" class="absolute inset-0 z-50 flex flex-col pb-24 overflow-y-auto no-scrollbar pt-12 items-center px-6" style="display: none;">
+        <header class="text-center mb-12 flex-shrink-0">
+            <div class="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-surface-container-high shadow-2xl shadow-black/40">
+                <span class="material-symbols-outlined text-tertiary text-4xl" data-icon="history_edu">history_edu</span>
+            </div>
+            <h1 class="font-headline text-3xl font-bold italic text-on-surface mb-2">Добро пожаловать в Летопись</h1>
+            <p class="text-on-surface-variant font-medium tracking-wide text-sm opacity-80 uppercase">The Heritage of Amir Timur</p>
+        </header>
+
+        <section class="w-full max-w-md bg-surface-container-low rounded-3xl p-8 shadow-2xl relative overflow-hidden flex-shrink-0">
+            <div class="absolute inset-0 border border-white/5 rounded-3xl pointer-events-none"></div>
+            <form id="onboarding-form" class="space-y-8">
+                <div class="space-y-2">
+                    <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Имя и Фамилия</label>
+                    <div class="relative group">
+                        <input id="on-name" required class="w-full bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface placeholder:text-outline/40 focus:ring-0 transition-all duration-300" placeholder="Амир Темур" type="text"/>
+                        <div class="absolute bottom-0 left-0 h-0.5 w-0 bg-secondary group-focus-within:w-full transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Класс</label>
+                        <div class="relative">
+                            <select id="on-class" class="w-full appearance-none bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface focus:ring-0">
+                                <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+                                <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+                                <option selected>11</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-4 top-4 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Буква</label>
+                        <div class="relative">
+                            <select id="on-letter" class="w-full appearance-none bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface focus:ring-0">
+                                <option selected>А</option><option>Б</option><option>В</option><option>Г</option><option>Д</option><option>И</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-4 top-4 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-4 px-6 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary font-bold text-lg shadow-lg shadow-primary-container/20 active:scale-95 transition-all duration-150 relative group">
+                        <span class="relative z-10">Зарегистрироваться</span>
+                        <div class="absolute inset-x-0 top-0 h-px bg-tertiary/30 rounded-t-xl"></div>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <footer class="mt-12 text-center max-w-xs flex-shrink-0">
+            <p class="font-headline italic text-tertiary/60 text-sm leading-relaxed">
+                "Справедливость — это не только основа власти, но и свет, освещающий путь летописца."
+            </p>
+            <div class="mt-6 flex justify-center space-x-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-secondary/40"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-tertiary/40"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-secondary/40"></div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Main Screens Container -->
+    <div id="screen-main" style="display: none;" class="w-full h-full flex flex-col relative z-10">
+        <!-- Main Top Header -->
+        <header id="main-header" class="absolute top-0 w-full flex justify-between items-center px-6 py-4 bg-gradient-to-b from-[#003399]/90 to-transparent dark:bg-[#0b1326]/80 backdrop-blur-xl z-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-tertiary/30 overflow-hidden shadow-inner">
+                    <img id="header-avatar" alt="Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=User&background=003399&color=e9c400"/>
+                </div>
+                <span class="font-notoSerif text-lg font-bold text-[#e9c400]">Heritage of Amir Timur</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="header-points" class="font-bold text-secondary text-sm hidden">0 очк.</span>
+                <span class="material-symbols-outlined text-[#b5c4ff] text-2xl" id="header-icon" data-icon="military_tech">military_tech</span>
+            </div>
+        </header>
+
+        <!-- Gallery Header (Overlay on Reels) -->
+        <header id="gallery-header" class="hidden absolute top-0 w-full z-50 flex justify-between items-center px-6 py-8 bg-gradient-to-b from-black/60 to-transparent">
+            <button id="btn-bookmarks" class="flex items-center gap-2 bg-surface-container-highest/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined text-tertiary text-xl" data-icon="bookmarks">bookmarks</span>
+                <span class="font-label text-sm font-medium tracking-wide text-white">Закладки</span>
+            </button>
+            <div class="flex items-center gap-4">
+                <button id="btn-add-photo" class="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary text-on-tertiary shadow-lg shadow-tertiary/20 hover:scale-105 transition-transform active:scale-95 relative">
+                    <span class="material-symbols-outlined" data-icon="add">add</span>
+                    <!-- Hidden File Input -->
+                    <input type="file" id="upload-reel-file" accept="image/*" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer hidden">
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace (Tab Content) -->
+        <main class="flex-1 w-full pt-20 pb-24 overflow-y-auto no-scrollbar scroll-smooth" id="main-content-area">
+            
+            <!-- TAB 1: Chronicle -->
+            <div id="tab-chronicle" class="tab-content relative px-4 max-w-2xl mx-auto pt-4" style="display: none;">
+                <div class="mb-10 text-center">
+                    <h1 class="font-notoSerif text-4xl italic font-bold text-tertiary mb-2">Летопись Империи</h1>
+                    <p class="text-on-surface-variant font-manrope text-sm tracking-widest uppercase">Хроники завоеваний и созидания</p>
+                </div>
+                <div id="chronicle-feed" class="space-y-8">
+                    <!-- Posts will be generated here -->
+                </div>
+            </div>
+
+            <!-- TAB 2: Quizzes -->
+            <div id="tab-quizzes" class="tab-content relative px-6 max-w-2xl mx-auto pt-4" style="display: none;">
+                <section class="mb-8 p-6 rounded-xl bg-surface-container-high relative overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.4)]">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <span class="material-symbols-outlined text-8xl" data-icon="cognition">cognition</span>
+                    </div>
+                    <div class="relative z-10">
+                        <h2 class="font-headline text-2xl italic text-primary mb-1">Ваши достижения</h2>
+                        <div class="flex items-end gap-2 mb-4">
+                            <span id="user-total-score" class="text-4xl font-bold text-tertiary">0</span>
+                            <span class="text-sm font-label text-on-surface-variant mb-1 uppercase tracking-widest">Очков</span>
+                        </div>
+                    </div>
+                </section>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-headline text-xl italic text-on-background">Испытания</h3>
+                    <span id="quizzes-count" class="text-xs font-label text-secondary uppercase tracking-tighter">Всего: 0</span>
+                </div>
+                <div id="quizzes-feed" class="grid gap-6">
+                    <!-- Quizzes will be mapped here. Completed vs Active logic -->
+                </div>
+            </div>
+
+            <!-- TAB 3: Gallery (Reels) -->
+            <div id="tab-gallery" class="tab-content w-full h-screen !pt-0 snap-y-mandatory no-scrollbar" style="display: none;">
+                <div id="gallery-feed" class="w-full h-full">
+                    <!-- Reels loaded here -->
+                </div>
+            </div>
+
+            <!-- TAB 4: Admin Panel -->
+            <div id="tab-admin" class="tab-content relative px-6 max-w-5xl mx-auto pt-4 pb-12" style="display: none;">
+                <div class="mb-8">
+                    <h1 class="font-headline text-3xl italic text-primary mb-2">Админ-панель</h1>
+                    <p class="text-on-surface-variant font-medium">Контроль наследия и модерация</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Add Chronicle Post -->
+                    <section class="lg:col-span-2 bg-surface-container-low p-6 rounded-xl shadow-xl">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-secondary" data-icon="history_edu">history_edu</span>
+                            <h2 class="font-headline text-xl text-on-surface">Создать летопись</h2>
+                        </div>
+                        <form id="form-add-chronicle" class="space-y-4">
+                            <input id="ac-title" placeholder="Заголовок" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
+                            <textarea id="ac-text" placeholder="Текст" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-secondary" rows="3"></textarea>
+                            <input type="text" id="ac-img" placeholder="URL Изображения" class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
+                            <button type="submit" class="w-full py-3 bg-primary-container text-on-primary font-bold rounded-xl shadow-lg">Опубликовать</button>
+                        </form>
+                    </section>
+                    
+                    <!-- Create Quiz -->
+                    <section class="lg:col-span-1 bg-surface-container-low p-6 rounded-xl shadow-xl">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-tertiary" data-icon="quiz">quiz</span>
+                            <h2 class="font-headline text-xl text-on-surface">Создать Испытание</h2>
+                        </div>
+                        <form id="form-add-quiz" class="space-y-4">
+                            <input id="aq-title" placeholder="Название (тема)" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
+                            
+                            <!-- Simple example creation form -->
+                            <textarea id="aq-options-json" placeholder='JSON: [{"q":"Вопрос?", "options":["A","B","C","D"], "correct":0}]' required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none resize-none" rows="3"></textarea>
+                            
+                            <input type="datetime-local" id="aq-endtime" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none"/>
+                            <button type="submit" class="w-full py-3 bg-tertiary-container text-on-tertiary font-bold rounded-xl shadow-lg">Запустить</button>
+                        </form>
+                    </section>
+
+                    <!-- Moderation -->
+                    <section class="md:col-span-2 lg:col-span-3 bg-surface-container-high p-6 rounded-xl shadow-2xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="font-headline text-xl text-on-surface">Модерация Галереи</h2>
+                            <span id="mod-count" class="bg-error-container text-on-error-container text-[10px] px-2 py-1 rounded-full font-bold">... ожидают</span>
+                        </div>
+                        <div id="mod-feed" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Items via JS -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Dynamic Bottom Nav -->
+        <nav id="bottom-bar" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-4 bg-[#2d3449]/90 dark:bg-[#2d3449]/90 backdrop-blur-xl rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.4)]">
+            <a id="tab-btn-chronicle" class="nav-tab active-tab flex flex-col items-center justify-center text-primary hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('chronicle')">
+                <span class="material-symbols-outlined nav-icon fill-icon mb-1" data-icon="history_edu">history_edu</span>
+                <span class="font-manrope text-[10px] uppercase tracking-wider">Летопись</span>
+            </a>
+            <a id="tab-btn-quizzes" class="nav-tab flex flex-col items-center justify-center text-[#b5c4ff]/60 hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('quizzes')">
+                <span class="material-symbols-outlined nav-icon mb-1" data-icon="quiz">quiz</span>
+                <span class="font-manrope text-[10px] uppercase tracking-wider">Испытания</span>
+            </a>
+            <a id="tab-btn-gallery" class="nav-tab flex flex-col items-center justify-center text-[#b5c4ff]/60 hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('gallery')">
+                <span class="material-symbols-outlined nav-icon mb-1" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+                <span class="font-manrope text-[10px] uppercase tracking-wider">Галерея</span>
+            </a>
+            <a id="tab-btn-admin" class="nav-tab hidden flex flex-col items-center justify-center text-error hover:text-error-container transition-colors group cursor-pointer" onclick="app.switchTab('admin')">
+                <span class="material-symbols-outlined nav-icon mb-1" data-icon="admin_panel_settings">admin_panel_settings</span>
+                <span class="font-manrope text-[10px] uppercase tracking-wider">Админ</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Hidden canvas for Story Generation -->
+    <canvas id="story-canvas" width="1080" height="1920"></canvas>
+
+    <!-- Quiz Modal (Overlay) -->
+    <div id="quiz-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-center items-center px-4">
+        <div class="bg-surface-container w-full max-w-md rounded-2xl p-6 shadow-2xl border border-secondary/20 relative">
+            <button onclick="app.closeQuiz()" class="absolute top-4 right-4 text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            <h2 id="qm-title" class="font-headline text-2xl text-primary mb-4">Название Квиза</h2>
+            <div id="qm-content" class="space-y-4">
+                <!-- Current Question / Score UI -->
+            </div>
+            <div id="qm-actions" class="mt-6 flex justify-end"></div>
+        </div>
+    </div>
+    
+    <!-- Upload Description Modal (Overlay) -->
+    <div id="upload-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-end">
+        <div class="bg-surface-container w-full rounded-t-3xl p-6 shadow-2xl relative animate-slide-up">
+            <button onclick="document.getElementById('upload-modal').classList.add('hidden')" class="absolute top-4 right-4 text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+            <h2 class="font-headline text-xl text-primary mb-2">Новое фото</h2>
+            <p class="text-sm text-on-surface-variant mb-4 font-label">Подпись (не более 30 символов)</p>
+            <input type="text" id="upload-desc" maxlength="30" class="w-full bg-surface-container-lowest text-on-surface rounded-xl p-4 border border-outline-variant focus:border-secondary transition-colors mb-4"/>
+            <button class="w-full py-4 rounded-xl bg-secondary text-on-secondary font-bold text-lg active:scale-95" onclick="app.submitReel()">Отправить на модерацию</button>
+        </div>
+    </div>
+
+    <!-- Bookmarks Modal -->
+    <div id="bookmarks-modal" class="fixed inset-0 z-[100] bg-background hidden flex flex-col">
+        <div class="pt-8 px-6 pb-4 flex items-center justify-between border-b border-outline/10 bg-surface-dim">
+            <h2 class="font-headline text-xl text-on-surface">Закладки</h2>
+            <button onclick="document.getElementById('bookmarks-modal').classList.add('hidden')" class="text-on-surface"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4" id="bookmarks-grid">
+            <!-- Items via JS -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

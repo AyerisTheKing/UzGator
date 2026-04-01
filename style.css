@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: max(884px, 100dvh);
+  overflow: hidden; /* Global scroll disabled, scroll only inside tabs */
+  background-color: #0b1326;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+
+.material-symbols-outlined.fill-icon {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.arabesque-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l2.5 7.5L40 10l-7.5 2.5L30 20l-2.5-7.5L20 10l7.5-2.5L30 0zm0 40l2.5 7.5L40 50l-7.5 2.5L30 60l-2.5-7.5L20 50l7.5-2.5L30 40zM10 20l2.5 7.5L20 30l-7.5 2.5L10 40l-2.5-7.5L0 30l7.5-2.5L10 20zm40 0l2.5 7.5L60 30l-7.5 2.5L50 40l-2.5-7.5L40 30l7.5-2.5L50 20z' fill='%2343e2d2' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.imperial-header-gradient {
+    background: linear-gradient(180deg, #003399 0%, #0b1326 100%);
+}
+
+.inner-glow {
+    box-shadow: inset 0 1px 0 0 rgba(233, 196, 0, 0.3);
+}
+
+.snap-y-mandatory { scroll-snap-type: y mandatory; }
+.snap-start { scroll-snap-align: start; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Custom Tab Container Scroll */
+.tab-content {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+/* Hide canvas off-screen for Story generation */
+#story-canvas {
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+}
