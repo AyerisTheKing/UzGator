@@ -1,4 +1,4 @@
-// Version: 1.2
+// Version: 1.3
 // Main configuration file and version tracking for Amir Timur TWA
 
-console.log("App Version: 1.2 - Added loading state and cache busting");
+console.log("App Version: 1.3 - Fixed Supabase JS collision");

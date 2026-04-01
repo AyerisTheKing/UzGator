@@ -12,7 +12,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_KrNqXfKfQlToEHXzzEU9tA_o-yLg15m';
 // const SUPABASE_SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtbnVidnVkaWVhZWlkcHR1aGhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTA0ODI1NiwiZXhwIjoyMDkwNjI0MjU2fQ.nPJR-fYmP8Bu7kqvK-kGOUup8qzatjiH1a1VcGsBpvE';
 const TG_BOT_TOKEN = '8649368118:AAF_jGsRAitirQQs4oQ7iPpZ07EZ2icO4r4'; // Kept for backend logic
 
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const app = {
     user: null,
@@ -43,7 +43,7 @@ const app = {
         document.getElementById('form-add-quiz').addEventListener('submit', this.adminAddQuiz.bind(this));
 
         // Start Flow
-        if(supabase) {
+        if(supabaseClient) {
             this.checkUser();
         } else {
             console.warn("Supabase not defined! Run in environment with Supabase script.");
@@ -58,7 +58,7 @@ const app = {
             const uid = tg.initDataUnsafe?.user?.id;
             if(!uid) throw new Error("No Telegram User ID");
             
-            const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
+            const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).single();
             if(error && error.code !== 'PGRST116') console.error(error); // PGRST116 is not found
             
             if(data) {
@@ -90,7 +90,7 @@ const app = {
             points: 0
         };
 
-        const { error } = await supabase.from('users').insert(payload);
+        const { error } = await supabaseClient.from('users').insert(payload);
         if(!error) {
             this.user = payload;
             document.getElementById('screen-onboarding').style.display = 'none';
@@ -169,7 +169,7 @@ const app = {
     async loadChronicle() {
         const feed = document.getElementById('chronicle-feed');
         feed.innerHTML = '<p class="text-center text-on-surface-variant">Загрузка летописи...</p>';
-        const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
         if(error || !data) {
             feed.innerHTML = '<p class="text-center text-error">Ошибка загрузки</p>';
             return;
@@ -283,11 +283,11 @@ const app = {
     async loadQuizzes() {
         const feed = document.getElementById('quizzes-feed');
         feed.innerHTML = '<p class="text-center">Загрузка...</p>';
-        const { data: quizzes, error } = await supabase.from('quizzes').select('*');
+        const { data: quizzes, error } = await supabaseClient.from('quizzes').select('*');
         if(error || !quizzes) return;
         
         // Fetch results for current user
-        const { data: results } = await supabase.from('quiz_results').select('*').eq('user_id', this.user?.id);
+        const { data: results } = await supabaseClient.from('quiz_results').select('*').eq('user_id', this.user?.id);
         const resultDict = {};
         if(results) {
             results.forEach(r => { resultDict[r.quiz_id] = r; });
@@ -404,7 +404,7 @@ const app = {
 
     async submitQuizScore() {
         // Save to quiz_results
-        await supabase.from('quiz_results').insert({
+        await supabaseClient.from('quiz_results').insert({
             user_id: this.user.id,
             quiz_id: this.currentQuiz.data.id,
             score: this.currentQuiz.score * 10 
@@ -412,7 +412,7 @@ const app = {
 
         // Add to user points globally too
         const newPts = (this.user.points || 0) + (this.currentQuiz.score * 10);
-        await supabase.from('users').update({ points: newPts }).eq('id', this.user.id);
+        await supabaseClient.from('users').update({ points: newPts }).eq('id', this.user.id);
         this.user.points = newPts;
         
         this.closeQuiz();
@@ -430,7 +430,7 @@ const app = {
         const feed = document.getElementById('gallery-feed');
         feed.innerHTML = '';
         
-        const { data, error } = await supabase.from('gallery').select('*, users!inner(name)').eq('is_moderated', true).order('created_at', {ascending: false});
+        const { data, error } = await supabaseClient.from('gallery').select('*, users!inner(name)').eq('is_moderated', true).order('created_at', {ascending: false});
         if(error || !data || data.length === 0) {
             feed.innerHTML = '<p class="text-center text-white pt-24">Нет доступных материалов</p>';
             return;
@@ -488,15 +488,15 @@ const app = {
             // Upload to storage (Assume configured bucket 'gallery_bucket')
             const ext = file.name.split('.').pop();
             const fName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-            const { error: sE } = await supabase.storage.from('gallery_bucket').upload(fName, file);
+            const { error: sE } = await supabaseClient.storage.from('gallery_bucket').upload(fName, file);
             
             if(sE) throw sE;
             
-            const { data } = supabase.storage.from('gallery_bucket').getPublicUrl(fName);
+            const { data } = supabaseClient.storage.from('gallery_bucket').getPublicUrl(fName);
             const pubUrl = data.publicUrl;
 
             // Insert unmoderated to DB
-            await supabase.from('gallery').insert({
+            await supabaseClient.from('gallery').insert({
                 user_id: this.user.id,
                 description: desc,
                 image_url: pubUrl,
@@ -536,7 +536,7 @@ const app = {
     },
 
     async saveBookmark(gallery_id) {
-        await supabase.from('bookmarks').insert({ user_id: this.user.id, gallery_id });
+        await supabaseClient.from('bookmarks').insert({ user_id: this.user.id, gallery_id });
         if(window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         } else {
@@ -547,7 +547,7 @@ const app = {
     async loadBookmarks() {
         const grid = document.getElementById('bookmarks-grid');
         grid.innerHTML = '<p>Загрузка...</p>';
-        const { data } = await supabase.from('bookmarks').select('gallery(*)').eq('user_id', this.user.id);
+        const { data } = await supabaseClient.from('bookmarks').select('gallery(*)').eq('user_id', this.user.id);
         if(!data || data.length === 0) {
             grid.innerHTML = `<p class="col-span-2 text-center text-on-surface-variant pt-10">Нет закладок</p>`;
             return;
@@ -578,7 +578,7 @@ const app = {
         const txt = document.getElementById('ac-text').value;
         const img = document.getElementById('ac-img').value;
 
-        await supabase.from('posts').insert({
+        await supabaseClient.from('posts').insert({
             title: t,
             content: txt,
             image_url: img || null
@@ -595,7 +595,7 @@ const app = {
 
         try {
             JSON.parse(qJson); // Validate JSON
-            await supabase.from('quizzes').insert({
+            await supabaseClient.from('quizzes').insert({
                 title: t,
                 questions: qJson,
                 end_time: new Date(end).toISOString()
@@ -610,7 +610,7 @@ const app = {
     async loadModerationFeed() {
         const dom = document.getElementById('mod-feed');
         dom.innerHTML = 'Загрузка...';
-        const { data } = await supabase.from('gallery').select('*, users!inner(name)').eq('is_moderated', false);
+        const { data } = await supabaseClient.from('gallery').select('*, users!inner(name)').eq('is_moderated', false);
         document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
         
         if(!data || data.length === 0) {
@@ -641,9 +641,9 @@ const app = {
 
     async modAction(id, action) {
         if(action === 'approve') {
-            await supabase.from('gallery').update({is_moderated: true}).eq('id', id);
+            await supabaseClient.from('gallery').update({is_moderated: true}).eq('id', id);
         } else {
-            await supabase.from('gallery').delete().eq('id', id);
+            await supabaseClient.from('gallery').delete().eq('id', id);
         }
         this.loadModerationFeed();
     }
@@ -669,7 +669,7 @@ app.checkUser = async function() {
     try {
         const uid = tg.initDataUnsafe?.user?.id;
         if(!uid) throw new Error("No user id, falling back to onboarding");
-        const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
+        const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).single();
         if(data) {
             this.user = data;
             this.bootMainApp();
