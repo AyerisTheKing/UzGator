@@ -48,6 +48,7 @@ const app = {
         } else {
             console.warn("Supabase not defined! Run in environment with Supabase script.");
              // Show fake UI
+            if (typeof removeLoader !== 'undefined') removeLoader();
             document.getElementById('screen-onboarding').style.display = 'flex';
         }
     },
@@ -648,6 +649,43 @@ const app = {
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+function removeLoader() {
+    const l = document.getElementById('screen-loading');
+    if(l) {
+        l.style.opacity = '0';
+        setTimeout(() => l.remove(), 500);
+    }
+}
+
+// Override boot functions to remove loader
+const originalBoot = app.bootMainApp.bind(app);
+app.bootMainApp = function() {
+    removeLoader();
+    originalBoot();
+}
+
+const originalCheck = app.checkUser.bind(app);
+app.checkUser = async function() {
+    try {
+        const uid = tg.initDataUnsafe?.user?.id;
+        if(!uid) throw new Error("No user id, falling back to onboarding");
+        const { data, error } = await supabase.from('users').select('*').eq('id', uid).single();
+        if(data) {
+            this.user = data;
+            this.bootMainApp();
+        } else {
+            removeLoader();
+            document.getElementById('screen-onboarding').style.display = 'flex';
+        }
+    } catch(e) {
+        console.warn(e);
+        removeLoader();
+        document.getElementById('screen-onboarding').style.display = 'flex';
+    }
+}
+
+if(document.readyState !== 'loading') {
     app.init();
-});
+} else {
+    window.addEventListener('DOMContentLoaded', () => app.init());
+}

@@ -338,7 +338,13 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <script src="app.js"></script>
+    <!-- Initial Loading Screen -->
+    <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center bg-background transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="font-headline text-primary italic">Загрузка данных...</p>
+    </div>
+
+    <script src="script.js?v=1.2"></script>
+    <script src="app.js?v=1.2"></script>
 </body>
 </html>
