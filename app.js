@@ -524,7 +524,7 @@ const app = {
         const feed = document.getElementById('gallery-feed');
         feed.innerHTML = '';
         
-        const { data, error } = await supabaseClient.from('gallery').select('*, users(full_name)').eq('is_moderated', true).order('created_at', {ascending: false});
+        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', true).order('created_at', {ascending: false});
         if(error) console.error("Gallery Load Error:", error);
         
         if(error || !data || data.length === 0) {
@@ -532,8 +532,14 @@ const app = {
             return;
         }
 
+        // Local Join for users
+        const userIds = [...new Set(data.map(g => g.user_id))];
+        const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name').in('tg_id', userIds);
+        const userMap = {};
+        if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text; });
+
         data.forEach(item => {
-            const userName = item.users && item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'резидент';
+            const userName = userMap[item.user_id] || 'резидент';
             const section = document.createElement('section');
             section.className = "relative h-[100dvh] w-full flex flex-col justify-end snap-start shrink-0";
             section.innerHTML = `
@@ -736,7 +742,7 @@ const app = {
     async loadModerationFeed() {
         const dom = document.getElementById('mod-feed');
         dom.innerHTML = 'Загрузка...';
-        const { data, error } = await supabaseClient.from('gallery').select('*, users(full_name)').eq('is_moderated', false);
+        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', false);
         if(error) console.error("Moderation Load Error:", error);
         
         document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
@@ -746,9 +752,15 @@ const app = {
             return;
         }
 
+        // Local Join
+        const userIds = [...new Set(data.map(g => g.user_id))];
+        const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name').in('tg_id', userIds);
+        const userMap = {};
+        if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text; });
+
         dom.innerHTML = '';
         data.forEach(item => {
-            const userName = item.users && item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'Неизвестно';
+            const userName = userMap[item.user_id] || 'Неизвестно';
             dom.innerHTML += `
             <div class="bg-surface-container-low rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
                 <div class="h-40 relative">

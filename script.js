@@ -1,4 +1,4 @@
-// Version: 2.0
+// Version: 2.1
 // Main configuration file and version tracking for Amir Timur TWA
 
-console.log("App Version: 2.0 - Stable Release: Moderation UI upgrades and fully rendered Story canvases");
+console.log("App Version: 2.1 - Bulletproof local-join for Supabase relational errors");
