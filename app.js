@@ -220,11 +220,15 @@ const app = {
                 }
             } catch(e) {} // Fallback to raw text_content
 
+            const sqTitle = titleText.replace(/'/g, "\\'").replace(/\n/g, ' ');
+            const sqDesc = contentText.replace(/'/g, "\\'").replace(/\n/g, ' ').replace(/"/g, '&quot;');
+            const sqImg = post.image_url || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600';
+
             const article = document.createElement('article');
             article.className = "bg-surface-container-low rounded-xl overflow-hidden shadow-2xl shadow-black/40 group";
             article.innerHTML = `
                 <div class="relative h-64 overflow-hidden">
-                    <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="${post.image_url || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600'}"/>
+                    <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="${sqImg}"/>
                     <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent"></div>
                     <div class="absolute top-4 left-4 bg-tertiary/90 text-on-tertiary px-3 py-1 rounded-full text-xs font-bold font-manrope">Летопись</div>
                 </div>
@@ -232,7 +236,7 @@ const app = {
                     <h2 class="font-notoSerif text-2xl font-bold text-primary mb-3">${titleText}</h2>
                     <p class="font-notoSerif text-on-surface/90 leading-relaxed italic mb-6 shadow-text line-clamp-4">${contentText}</p>
                     <div class="flex items-center justify-between pt-4 border-t border-outline-variant/20">
-                        <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${titleText.replace(/'/g, "\\'")}')">
+                        <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${sqTitle}', '${sqDesc}', '${sqImg}')">
                             <span class="material-symbols-outlined text-lg" data-icon="auto_awesome_motion">auto_awesome_motion</span>
                             <span class="text-xs font-manrope font-bold">Поделиться в Сторис</span>
                         </button>
@@ -243,40 +247,103 @@ const app = {
         });
     },
 
-    shareStory(titleText) {
+    shareStory(titleText, descText, imgUrl) {
         const canvas = document.getElementById('story-canvas');
         const ctx = canvas.getContext('2d');
-        const bgImg = new Image();
-        bgImg.crossOrigin = "Anonymous";
-        bgImg.src = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1080&h=1920";
-        bgImg.onload = () => {
-            ctx.drawImage(bgImg, 0, 0, 1080, 1920);
-            ctx.fillStyle = "rgba(11, 19, 38, 0.7)"; 
-            ctx.fillRect(0, 0, 1080, 1920);
-            ctx.fillStyle = "rgba(0, 51, 153, 0.5)"; 
-            ctx.beginPath();
-            ctx.roundRect(100, 600, 880, 400, 40);
-            ctx.fill();
+        const postImg = new Image();
+        postImg.crossOrigin = "Anonymous";
+        postImg.src = imgUrl;
 
+        postImg.onload = () => {
+            // Draw gradient background
+            const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+            bgGrad.addColorStop(0, "#0b1326");
+            bgGrad.addColorStop(1, "#00164e");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Draw blurred/darkened image as background layer
+            const coverRatio = 1080/1920;
+            const imgRatio = postImg.width / postImg.height;
+            let sx, sy, sw, sh;
+            if (imgRatio > coverRatio) {
+                sh = postImg.height; sw = postImg.height * coverRatio;
+                sx = (postImg.width - sw) / 2; sy = 0;
+            } else {
+                sw = postImg.width; sh = postImg.width / coverRatio;
+                sx = 0; sy = (postImg.height - sh) / 2;
+            }
+            ctx.globalAlpha = 0.3;
+            ctx.drawImage(postImg, sx, sy, sw, sh, 0, 0, 1080, 1920);
+            ctx.globalAlpha = 1.0;
+
+            // Draw Card Container
+            ctx.fillStyle = "rgba(23, 31, 51, 0.9)"; 
+            ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+            ctx.shadowBlur = 40;
+            ctx.beginPath();
+            ctx.roundRect(80, 400, 920, 1100, 60);
+            ctx.fill();
+            ctx.shadowBlur = 0; // reset
+
+            // Draw Image inside the card (Height: 500)
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(80, 400, 920, 500, 60);
+            ctx.fill();
+            ctx.clip();
+            const cRatio2 = 920/500;
+            let sx2, sy2, sw2, sh2;
+            if (imgRatio > cRatio2) {
+                sh2 = postImg.height; sw2 = postImg.height * cRatio2;
+                sx2 = (postImg.width - sw2) / 2; sy2 = 0;
+            } else {
+                sw2 = postImg.width; sh2 = postImg.width / cRatio2;
+                sx2 = 0; sy2 = (postImg.height - sh2) / 2;
+            }
+            ctx.drawImage(postImg, sx2, sy2, sw2, sh2, 80, 400, 920, 500);
+            ctx.restore();
+
+            // Gradient fade below image
+            const grad = ctx.createLinearGradient(0, 800, 0, 950);
+            grad.addColorStop(0, "rgba(23, 31, 51, 0)");
+            grad.addColorStop(1, "rgba(23, 31, 51, 1)");
+            ctx.fillStyle = grad;
+            ctx.fillRect(80, 800, 920, 150);
+
+            // Title
             ctx.font = "bold 64px serif";
             ctx.fillStyle = "#e9c400";
             ctx.textAlign = "center";
-            ctx.fillText("Наследие Амира Темура", 540, 700);
-
-            ctx.font = "italic 48px sans-serif";
-            ctx.fillStyle = "#ffffff";
-            
-            const lines = this.getLines(ctx, titleText, 800);
-            let y = 800;
-            lines.forEach(line => {
+            let y = 1000;
+            const titleLines = this.getLines(ctx, titleText, 800);
+            titleLines.forEach(line => {
                 ctx.fillText(line, 540, y);
-                y += 60;
+                y += 75;
             });
 
-            ctx.font = "bold 32px sans-serif";
-            ctx.fillStyle = "#43e2d2"; 
-            ctx.fillText("@heritage_bot_twa", 540, 1800);
+            // Description
+            ctx.font = "italic 44px sans-serif";
+            ctx.fillStyle = "#dae2fd";
+            y += 10;
+            const descLines = this.getLines(ctx, descText, 800);
+            const maxDescLines = 4;
+            for(let i=0; i<Math.min(descLines.length, maxDescLines); i++) {
+                ctx.fillText(descLines[i], 540, y);
+                y += 55;
+            }
+            if(descLines.length > maxDescLines) ctx.fillText("...", 540, y);
 
+            // Labels
+            ctx.font = "bold 48px sans-serif";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText("Наследие Амира Темура", 540, 300);
+
+            ctx.font = "bold 40px sans-serif";
+            ctx.fillStyle = "#43e2d2"; 
+            ctx.fillText("@UzGatorBot", 540, 1700);
+
+            // Download
             const dataUrl = canvas.toDataURL("image/png");
             
             const a = document.createElement('a');
@@ -291,6 +358,10 @@ const app = {
             } else {
                 alert("Изображение сохранено!");
             }
+        };
+
+        postImg.onerror = () => {
+            alert("Ошибка загрузки изображения. Скорее всего настройки CORS не разрешают скачивание.");
         };
     },
 
@@ -665,7 +736,7 @@ const app = {
     async loadModerationFeed() {
         const dom = document.getElementById('mod-feed');
         dom.innerHTML = 'Загрузка...';
-        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', false);
+        const { data, error } = await supabaseClient.from('gallery').select('*, users(full_name)').eq('is_moderated', false);
         if(error) console.error("Moderation Load Error:", error);
         
         document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
@@ -677,15 +748,16 @@ const app = {
 
         dom.innerHTML = '';
         data.forEach(item => {
+            const userName = item.users && item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'Неизвестно';
             dom.innerHTML += `
             <div class="bg-surface-container-low rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
                 <div class="h-40 relative">
                     <img src="${item.photo_url}" class="w-full h-full object-cover" />
-                    <div class="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-white">ID: ${item.id}</div>
+                    <div class="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-white">от: ${userName}</div>
                 </div>
                 <div class="p-4 flex flex-col gap-4">
                     <div class="flex justify-between items-start">
-                        <span class="text-xs font-medium text-on-surface">${item.caption || ''}</span>
+                        <span class="text-xs font-medium text-on-surface">"${item.caption || 'Без подписи'}"</span>
                     </div>
                 <div class="flex gap-2">
                     <button class="flex-1 py-2 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg text-xs font-bold hover:bg-secondary/30 transition-colors" onclick="app.modAction('${item.id}', 'approve')">Одобрить</button>
