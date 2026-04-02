@@ -462,9 +462,9 @@ const app = {
         }
 
         data.forEach(item => {
-            const userName = item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'резидент';
+            const userName = item.users && item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'резидент';
             const section = document.createElement('section');
-            section.className = "relative h-screen w-full flex flex-col justify-end snap-start";
+            section.className = "relative h-[100dvh] w-full flex flex-col justify-end snap-start shrink-0";
             section.innerHTML = `
                 <img alt="Reel" class="absolute inset-0 w-full h-[100dvh] object-cover" src="${item.photo_url}"/>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>

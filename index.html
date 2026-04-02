@@ -221,8 +221,8 @@
             </div>
 
             <!-- TAB 3: Gallery (Reels) -->
-            <div id="tab-gallery" class="tab-content w-full h-screen !pt-0 snap-y-mandatory no-scrollbar" style="display: none;">
-                <div id="gallery-feed" class="w-full h-full">
+            <div id="tab-gallery" class="tab-content absolute inset-0 z-40 bg-black pb-24 overflow-y-auto snap-y snap-mandatory no-scrollbar" style="display: none;">
+                <div id="gallery-feed" class="w-full pb-20">
                     <!-- Reels loaded here -->
                 </div>
             </div>
@@ -337,9 +337,12 @@
 
     <!-- Bookmarks Modal -->
     <div id="bookmarks-modal" class="fixed inset-0 z-[100] bg-background hidden flex flex-col">
-        <div class="pt-8 px-6 pb-4 flex items-center justify-between border-b border-outline/10 bg-surface-dim">
-            <h2 class="font-headline text-xl text-on-surface">Закладки</h2>
-            <button onclick="document.getElementById('bookmarks-modal').classList.add('hidden')" class="text-on-surface"><span class="material-symbols-outlined">close</span></button>
+        <div class="pt-12 px-6 pb-4 flex items-center justify-start border-b border-outline/10 bg-surface-dim gap-4">
+            <button onclick="document.getElementById('bookmarks-modal').classList.add('hidden')" class="text-on-surface flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="font-label text-sm font-medium">Назад</span>
+            </button>
+            <h2 class="font-headline text-xl text-on-surface ml-2">Закладки</h2>
         </div>
         <div class="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4" id="bookmarks-grid">
             <!-- Items via JS -->
@@ -352,7 +355,7 @@
         <p class="font-headline text-primary italic">Загрузка данных...</p>
     </div>
 
-    <script src="script.js?v=1.7"></script>
-    <script src="app.js?v=1.7"></script>
+    <script src="script.js?v=1.8"></script>
+    <script src="app.js?v=1.8"></script>
 </body>
 </html>
