@@ -244,7 +244,11 @@
                         <form id="form-add-chronicle" class="space-y-4">
                             <input id="ac-title" placeholder="Заголовок" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
                             <textarea id="ac-text" placeholder="Текст" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none resize-none focus:ring-2 focus:ring-secondary" rows="3"></textarea>
-                            <input type="text" id="ac-img" placeholder="URL Изображения" class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
+                            <label class="block text-xs text-on-surface-variant ml-1 font-label">Обложка</label>
+                            <div class="relative w-full bg-surface-container-lowest rounded-lg p-3 border border-dashed border-outline-variant flex items-center justify-center hover:border-secondary transition-colors overflow-hidden">
+                                <input type="file" id="ac-img-file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
+                                <span class="text-sm font-label text-on-surface-variant z-0 pointer-events-none" id="ac-file-label">Выберите Изображение из Галереи</span>
+                            </div>
                             <button type="submit" class="w-full py-3 bg-primary-container text-on-primary font-bold rounded-xl shadow-lg">Опубликовать</button>
                         </form>
                     </section>
@@ -261,7 +265,11 @@
                             <!-- Simple example creation form -->
                             <textarea id="aq-options-json" placeholder='JSON: [{"q":"Вопрос?", "options":["A","B","C","D"], "correct":0}]' required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none resize-none" rows="3"></textarea>
                             
-                            <input type="datetime-local" id="aq-endtime" required class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none"/>
+                            <!-- Improved End-Time Input -->
+                            <div class="space-y-1">
+                                <label class="block text-xs text-on-surface-variant ml-1 font-label">Сколько часов будет доступен?</label>
+                                <input type="number" id="aq-duration-hours" placeholder="Длительность (в часах)" required min="1" value="24" class="w-full bg-surface-container-lowest border-none rounded-lg p-3 outline-none focus:ring-2 focus:ring-secondary"/>
+                            </div>
                             <button type="submit" class="w-full py-3 bg-tertiary-container text-on-tertiary font-bold rounded-xl shadow-lg">Запустить</button>
                         </form>
                     </section>
@@ -344,7 +352,7 @@
         <p class="font-headline text-primary italic">Загрузка данных...</p>
     </div>
 
-    <script src="script.js?v=1.5"></script>
-    <script src="app.js?v=1.5"></script>
+    <script src="script.js?v=1.7"></script>
+    <script src="app.js?v=1.7"></script>
 </body>
 </html>

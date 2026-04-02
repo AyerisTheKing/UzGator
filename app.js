@@ -40,6 +40,20 @@ const app = {
         // Admin Forms
         document.getElementById('form-add-chronicle').addEventListener('submit', this.adminAddChronicle.bind(this));
         document.getElementById('form-add-quiz').addEventListener('submit', this.adminAddQuiz.bind(this));
+        
+        const chronicleFileInput = document.getElementById('ac-img-file');
+        if(chronicleFileInput) {
+            chronicleFileInput.addEventListener('change', (e) => {
+                const label = document.getElementById('ac-file-label');
+                if(e.target.files[0]) {
+                    label.textContent = e.target.files[0].name.substring(0,25) + '...';
+                    label.classList.add('text-secondary');
+                } else {
+                    label.textContent = 'Выберите Изображение из телефона';
+                    label.classList.remove('text-secondary');
+                }
+            });
+        }
 
         // Start Flow
         if(supabaseClient) {
@@ -74,11 +88,23 @@ const app = {
 
     async handleOnboarding(e) {
         e.preventDefault();
-        const name = document.getElementById('on-name').value;
+        const name = document.getElementById('on-name').value.trim();
         const cls = document.getElementById('on-class').value;
         const letter = document.getElementById('on-letter').value;
         const uid = tg.initDataUnsafe?.user?.id || Date.now();
         
+        // 1. Check if name already exists
+        const { data: existingUser } = await supabaseClient
+            .from('users')
+            .select('tg_id')
+            .eq('full_name->>text', name)
+            .maybeSingle();
+
+        if (existingUser && existingUser.tg_id !== uid) {
+            alert("Это имя уже занято! Пожалуйста, добавьте к имени первую букву фамилии или используйте другое имя.");
+            return;
+        }
+
         // Match user schema exactly
         const payload = {
             tg_id: uid,
@@ -88,7 +114,7 @@ const app = {
             is_banned_photo: false
         };
 
-        const { error } = await supabaseClient.from('users').insert(payload);
+        const { error } = await supabaseClient.from('users').upsert(payload, { onConflict: 'tg_id' });
         if(!error) {
             this.user = payload;
             document.getElementById('screen-onboarding').style.display = 'none';
@@ -427,7 +453,9 @@ const app = {
         const feed = document.getElementById('gallery-feed');
         feed.innerHTML = '';
         
-        const { data, error } = await supabaseClient.from('gallery').select('*, users!inner(full_name)').eq('is_moderated', true).order('created_at', {ascending: false});
+        const { data, error } = await supabaseClient.from('gallery').select('*, users(full_name)').eq('is_moderated', true).order('created_at', {ascending: false});
+        if(error) console.error("Gallery Load Error:", error);
+        
         if(error || !data || data.length === 0) {
             feed.innerHTML = '<p class="text-center text-white pt-24">Нет доступных материалов</p>';
             return;
@@ -571,32 +599,64 @@ const app = {
         e.preventDefault();
         const t = document.getElementById('ac-title').value;
         const txt = document.getElementById('ac-text').value;
-        const img = document.getElementById('ac-img').value;
+        const fileInput = document.getElementById('ac-img-file');
+        const file = fileInput ? fileInput.files[0] : null;
 
-        await supabaseClient.from('posts').insert({
-            author_id: this.user.tg_id,
-            image_url: img || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600',
-            text_content: JSON.stringify({ title: t, content: txt })
-        });
-        alert('Запись опубликована!');
-        e.target.reset();
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.textContent = "Публикация...";
+        btn.disabled = true;
+
+        try {
+            let pubUrl = null;
+            if(file) {
+                const ext = file.name.split('.').pop();
+                const fName = `chronicle_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+                const { error: sE } = await supabaseClient.storage.from('gallery_bucket').upload(fName, file);
+                if(sE) throw sE;
+                const { data } = supabaseClient.storage.from('gallery_bucket').getPublicUrl(fName);
+                pubUrl = data.publicUrl;
+            }
+
+            await supabaseClient.from('posts').insert({
+                author_id: this.user.tg_id,
+                image_url: pubUrl || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600',
+                text_content: JSON.stringify({ title: t, content: txt })
+            });
+
+            alert('Запись опубликована!');
+            e.target.reset();
+            const label = document.getElementById('ac-file-label');
+            if(label) {
+                label.textContent = 'Выберите Изображение из телефона';
+                label.classList.remove('text-secondary');
+            }
+            this.loadChronicle(); // Reload immediately so user sees it!
+        } catch(err) {
+            alert("Ошибка публикации: " + err.message);
+        } finally {
+            btn.textContent = "Опубликовать";
+            btn.disabled = false;
+        }
     },
 
     async adminAddQuiz(e) {
         e.preventDefault();
         const t = document.getElementById('aq-title').value;
         const qJson = document.getElementById('aq-options-json').value;
-        const end = document.getElementById('aq-endtime').value;
+        const durationHours = parseInt(document.getElementById('aq-duration-hours').value) || 24;
 
         try {
             JSON.parse(qJson);
+            const endTimeIso = new Date(Date.now() + durationHours * 3600000).toISOString();
+            
             await supabaseClient.from('quizzes').insert({
                 title: t,
                 questions: qJson,
-                end_time: new Date(end).toISOString()
+                end_time: endTimeIso
             });
-            alert('Квиз сохранен!');
+            alert('Квиз сохранен и уже запущен!');
             e.target.reset();
+            this.loadQuizzes(); // update the list
         } catch (err) {
             alert('Неверный формат JSON');
         }
@@ -605,7 +665,9 @@ const app = {
     async loadModerationFeed() {
         const dom = document.getElementById('mod-feed');
         dom.innerHTML = 'Загрузка...';
-        const { data } = await supabaseClient.from('gallery').select('*, users!inner(full_name)').eq('is_moderated', false);
+        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', false);
+        if(error) console.error("Moderation Load Error:", error);
+        
         document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
         
         if(!data || data.length === 0) {
