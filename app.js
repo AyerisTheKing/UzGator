@@ -9,7 +9,6 @@ const tg = window.Telegram?.WebApp || {
 const SUPABASE_URL = 'https://bmnubvudieaeidptuhhq.supabase.co';
 // Use Publishable key for Frontend
 const SUPABASE_ANON_KEY = 'sb_publishable_KrNqXfKfQlToEHXzzEU9tA_o-yLg15m'; 
-// const SUPABASE_SERVICE_ROLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtbnVidnVkaWVhZWlkcHR1aGhxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTA0ODI1NiwiZXhwIjoyMDkwNjI0MjU2fQ.nPJR-fYmP8Bu7kqvK-kGOUup8qzatjiH1a1VcGsBpvE';
 const TG_BOT_TOKEN = '8649368118:AAF_jGsRAitirQQs4oQ7iPpZ07EZ2icO4r4'; // Kept for backend logic
 
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -47,7 +46,6 @@ const app = {
             this.checkUser();
         } else {
             console.warn("Supabase not defined! Run in environment with Supabase script.");
-             // Show fake UI
             if (typeof removeLoader !== 'undefined') removeLoader();
             document.getElementById('screen-onboarding').style.display = 'flex';
         }
@@ -58,7 +56,8 @@ const app = {
             const uid = tg.initDataUnsafe?.user?.id;
             if(!uid) throw new Error("No Telegram User ID");
             
-            const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).single();
+            // Schema updated: tg_id instead of id
+            const { data, error } = await supabaseClient.from('users').select('*').eq('tg_id', uid).single();
             if(error && error.code !== 'PGRST116') console.error(error); // PGRST116 is not found
             
             if(data) {
@@ -80,14 +79,13 @@ const app = {
         const letter = document.getElementById('on-letter').value;
         const uid = tg.initDataUnsafe?.user?.id || Date.now();
         
+        // Match user schema exactly
         const payload = {
-            id: uid,
-            name: name,
-            class_num: parseInt(cls),
-            class_letter: letter,
+            tg_id: uid,
+            full_name: { text: name },
+            class_info: { num: parseInt(cls), letter: letter },
             is_admin: false,
-            is_banned_photo: false,
-            points: 0
+            is_banned_photo: false
         };
 
         const { error } = await supabaseClient.from('users').insert(payload);
@@ -101,15 +99,30 @@ const app = {
         }
     },
 
-    bootMainApp() {
+    async bootMainApp() {
         document.getElementById('screen-main').style.display = 'flex';
         document.getElementById('screen-onboarding').style.display = 'none';
         
         // Setup header
         if(this.user) {
-            document.getElementById('header-points').textContent = (this.user.points || 0) + " очк.";
+            // Aggregate score from quiz_results
+            const { data: qRes } = await supabaseClient.from('quiz_results').select('score').eq('user_id', this.user.tg_id);
+            const totalScore = qRes ? qRes.reduce((a, b) => a + b.score, 0) : 0;
+            this.user.points = totalScore;
+            
+            document.getElementById('header-points').textContent = totalScore + " очк.";
             document.getElementById('header-points').classList.remove('hidden');
-            document.getElementById('user-total-score').textContent = this.user.points || 0;
+            document.getElementById('user-total-score').textContent = totalScore;
+
+            // Update Avatar Name
+            const headerAvatar = document.getElementById('header-avatar');
+            if(headerAvatar) {
+                let nameStr = 'И'; // default
+                if(this.user.full_name && this.user.full_name.text) {
+                    nameStr = this.user.full_name.text.charAt(0).toUpperCase();
+                }
+                headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameStr)}&background=003399&color=e9c400`;
+            }
             
             // Show Admin Tab if applicable
             if(this.user.is_admin) {
@@ -122,12 +135,10 @@ const app = {
 
     // --- Routing ---
     switchTab(tabName) {
-        // Reset Tabs Visuals
         document.querySelectorAll('.nav-tab').forEach(el => {
             el.querySelector('.nav-icon').classList.remove('fill-icon');
             el.classList.remove('text-[#e9c400]', 'text-primary');
             el.classList.add('text-[#b5c4ff]/60');
-            // Hack for the line below active tab
             el.classList.remove('relative', 'after:content-[\'\']', 'after:w-1', 'after:h-1', 'after:bg-[#43e2d2]', 'after:rounded-full', 'after:mt-1', 'scale-110');
         });
 
@@ -138,15 +149,12 @@ const app = {
             activeEl.querySelector('.nav-icon').classList.add('fill-icon');
         }
 
-        // Hide contents
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         
-        // Show selected
         const cTab = document.getElementById(`tab-${tabName}`);
         if(cTab) {
-            // Gallery overrides headers/backgrounds slightly
             if(tabName === 'gallery') {
-                cTab.style.display = 'block'; // Or flex if using flex layout
+                cTab.style.display = 'block'; 
                 document.getElementById('main-header').classList.add('hidden');
                 document.getElementById('gallery-header').classList.remove('hidden');
             } else {
@@ -158,7 +166,6 @@ const app = {
 
         this.currentTab = tabName;
         
-        // Load data specific to the tab
         if(tabName === 'chronicle') this.loadChronicle();
         if(tabName === 'quizzes') this.loadQuizzes();
         if(tabName === 'gallery') this.loadGallery();
@@ -169,7 +176,7 @@ const app = {
     async loadChronicle() {
         const feed = document.getElementById('chronicle-feed');
         feed.innerHTML = '<p class="text-center text-on-surface-variant">Загрузка летописи...</p>';
-        const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabaseClient.from('posts').select('*, users(full_name)').order('created_at', { ascending: false });
         if(error || !data) {
             feed.innerHTML = '<p class="text-center text-error">Ошибка загрузки</p>';
             return;
@@ -177,6 +184,16 @@ const app = {
 
         feed.innerHTML = '';
         data.forEach(post => {
+            let titleText = 'Новая Запись';
+            let contentText = post.text_content;
+            try {
+                const parsed = JSON.parse(post.text_content);
+                if(parsed.title && parsed.content) {
+                    titleText = parsed.title;
+                    contentText = parsed.content;
+                }
+            } catch(e) {} // Fallback to raw text_content
+
             const article = document.createElement('article');
             article.className = "bg-surface-container-low rounded-xl overflow-hidden shadow-2xl shadow-black/40 group";
             article.innerHTML = `
@@ -186,10 +203,10 @@ const app = {
                     <div class="absolute top-4 left-4 bg-tertiary/90 text-on-tertiary px-3 py-1 rounded-full text-xs font-bold font-manrope">Летопись</div>
                 </div>
                 <div class="p-6">
-                    <h2 class="font-notoSerif text-2xl font-bold text-primary mb-3">${post.title}</h2>
-                    <p class="font-notoSerif text-on-surface/90 leading-relaxed italic mb-6 shadow-text line-clamp-4">${post.content}</p>
+                    <h2 class="font-notoSerif text-2xl font-bold text-primary mb-3">${titleText}</h2>
+                    <p class="font-notoSerif text-on-surface/90 leading-relaxed italic mb-6 shadow-text line-clamp-4">${contentText}</p>
                     <div class="flex items-center justify-between pt-4 border-t border-outline-variant/20">
-                        <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${post.title.replace(/'/g, "\\'")}')">
+                        <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${titleText.replace(/'/g, "\\'")}')">
                             <span class="material-symbols-outlined text-lg" data-icon="auto_awesome_motion">auto_awesome_motion</span>
                             <span class="text-xs font-manrope font-bold">Поделиться в Сторис</span>
                         </button>
@@ -203,34 +220,26 @@ const app = {
     shareStory(titleText) {
         const canvas = document.getElementById('story-canvas');
         const ctx = canvas.getContext('2d');
-        
-        // Make background image
         const bgImg = new Image();
         bgImg.crossOrigin = "Anonymous";
-        bgImg.src = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1080&h=1920"; // Beautiful generic bg template
+        bgImg.src = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1080&h=1920";
         bgImg.onload = () => {
             ctx.drawImage(bgImg, 0, 0, 1080, 1920);
-            
-            // Add Overlay
-            ctx.fillStyle = "rgba(11, 19, 38, 0.7)"; // #0b1326 tint
+            ctx.fillStyle = "rgba(11, 19, 38, 0.7)"; 
             ctx.fillRect(0, 0, 1080, 1920);
-
-            // Add text background box
-            ctx.fillStyle = "rgba(0, 51, 153, 0.5)"; // primary container
+            ctx.fillStyle = "rgba(0, 51, 153, 0.5)"; 
             ctx.beginPath();
             ctx.roundRect(100, 600, 880, 400, 40);
             ctx.fill();
 
-            // Text
             ctx.font = "bold 64px serif";
-            ctx.fillStyle = "#e9c400"; // Tertiary (Gold)
+            ctx.fillStyle = "#e9c400";
             ctx.textAlign = "center";
             ctx.fillText("Наследие Амира Темура", 540, 700);
 
             ctx.font = "italic 48px sans-serif";
             ctx.fillStyle = "#ffffff";
             
-            // Text wrap logic (naive)
             const lines = this.getLines(ctx, titleText, 800);
             let y = 800;
             lines.forEach(line => {
@@ -239,12 +248,11 @@ const app = {
             });
 
             ctx.font = "bold 32px sans-serif";
-            ctx.fillStyle = "#43e2d2"; // Secondary
+            ctx.fillStyle = "#43e2d2"; 
             ctx.fillText("@heritage_bot_twa", 540, 1800);
 
             const dataUrl = canvas.toDataURL("image/png");
             
-            // Trigger download
             const a = document.createElement('a');
             a.href = dataUrl;
             a.download = `story_${Date.now()}.png`;
@@ -253,9 +261,9 @@ const app = {
             document.body.removeChild(a);
             
             if(window.Telegram?.WebApp?.showPopup) {
-                window.Telegram.WebApp.showPopup({message: "Изображение сохранено! Теперь вы можете добавить его в сторис Telegram."});
+                window.Telegram.WebApp.showPopup({message: "Изображение сохранено!"});
             } else {
-                alert("Изображение для Сторис сгенерировано!");
+                alert("Изображение сохранено!");
             }
         };
     },
@@ -286,8 +294,7 @@ const app = {
         const { data: quizzes, error } = await supabaseClient.from('quizzes').select('*');
         if(error || !quizzes) return;
         
-        // Fetch results for current user
-        const { data: results } = await supabaseClient.from('quiz_results').select('*').eq('user_id', this.user?.id);
+        const { data: results } = await supabaseClient.from('quiz_results').select('*').eq('user_id', this.user?.tg_id);
         const resultDict = {};
         if(results) {
             results.forEach(r => { resultDict[r.quiz_id] = r; });
@@ -295,7 +302,6 @@ const app = {
 
         document.getElementById('quizzes-count').textContent = `Всего: ${quizzes.length}`;
         feed.innerHTML = '';
-        
         const now = new Date();
 
         quizzes.forEach(quiz => {
@@ -304,9 +310,7 @@ const app = {
             const isActive = now < end;
             
             let html = '';
-            
             if (hasResult || !isActive) {
-                // Completed visually
                 const p = resultDict[quiz.id]?.score || 0;
                 html = `
                 <div class="bg-surface-container-lowest/50 rounded-xl p-6 border border-outline-variant/15 opacity-80">
@@ -322,7 +326,6 @@ const app = {
                     </div>
                 </div>`;
             } else {
-                // Active Card
                 html = `
                 <div class="group bg-surface-container-low rounded-xl p-6 border-l-4 border-secondary shadow-lg relative overflow-hidden">
                     <div class="flex justify-between items-start mb-4">
@@ -332,8 +335,7 @@ const app = {
                         </div>
                         <span class="material-symbols-outlined text-tertiary" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
                     </div>
-                    
-                    <button class="w-full bg-primary-container text-on-primary py-3 rounded-xl font-bold inner-glow flex items-center justify-center gap-2 mt-4 active:scale-95 transition-all" onclick="app.openQuiz(${quiz.id}, ${hasResult})">
+                    <button class="w-full bg-primary-container text-on-primary py-3 rounded-xl font-bold inner-glow flex items-center justify-center gap-2 mt-4 active:scale-95 transition-all" onclick="app.openQuiz('${quiz.id}', ${hasResult})">
                         <span>Начать испытание</span>
                         <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
                     </button>
@@ -342,7 +344,6 @@ const app = {
             feed.innerHTML += html;
         });
         
-        // Save quizzes for later execution
         this.cacheQuizzes = quizzes;
     },
 
@@ -362,7 +363,7 @@ const app = {
             this.renderQuizStep();
             document.getElementById('quiz-modal').classList.remove('hidden');
         } catch(e) {
-            console.error("Quiz Parse Error", e);
+            console.error(e);
         }
     },
 
@@ -372,7 +373,6 @@ const app = {
         const container = document.getElementById('qm-content');
         
         if(!qData) {
-            // Finished
             container.innerHTML = `<h3 class="text-xl text-center text-secondary mb-4">Завершено!</h3><p class="text-center">Вы ответили верно на ${c.score} из ${c.questions.length}. Очки будут начислены!</p>`;
             document.getElementById('qm-actions').innerHTML = `<button onclick="app.submitQuizScore()" class="bg-primary-container text-on-primary px-6 py-2 rounded-xl">Завершить</button>`;
             return;
@@ -386,38 +386,35 @@ const app = {
         container.innerHTML = `
             <p class="text-[10px] text-tertiary mb-2 uppercase tracking-widest">Вопрос ${c.index + 1} из ${c.questions.length}</p>
             <h4 class="text-lg font-headline leading-tight mb-6">${qData.q}</h4>
-            <div class="space-y-2">
-                ${optsHtml}
-            </div>
+            <div class="space-y-2">${optsHtml}</div>
         `;
         document.getElementById('qm-actions').innerHTML = '';
     },
 
     answerQuiz(selectedIdx, correctIdx) {
         const c = this.currentQuiz;
-        if(selectedIdx === correctIdx) {
-            c.score += 1; // Or some logic
-        }
+        if(selectedIdx === correctIdx) c.score += 1;
         c.index++;
         this.renderQuizStep();
     },
 
     async submitQuizScore() {
-        // Save to quiz_results
+        const addedScore = this.currentQuiz.score * 10;
         await supabaseClient.from('quiz_results').insert({
-            user_id: this.user.id,
+            user_id: this.user.tg_id,
             quiz_id: this.currentQuiz.data.id,
-            score: this.currentQuiz.score * 10 
+            score: addedScore,
+            answers_log: {}
         });
 
-        // Add to user points globally too
-        const newPts = (this.user.points || 0) + (this.currentQuiz.score * 10);
-        await supabaseClient.from('users').update({ points: newPts }).eq('id', this.user.id);
+        // Add to local UI points
+        const newPts = (this.user.points || 0) + addedScore;
         this.user.points = newPts;
+        document.getElementById('header-points').textContent = newPts + " очк.";
+        document.getElementById('user-total-score').textContent = newPts;
         
         this.closeQuiz();
         this.loadQuizzes();
-        document.getElementById('header-points').textContent = newPts + " очк.";
     },
 
     closeQuiz() {
@@ -430,33 +427,34 @@ const app = {
         const feed = document.getElementById('gallery-feed');
         feed.innerHTML = '';
         
-        const { data, error } = await supabaseClient.from('gallery').select('*, users!inner(name)').eq('is_moderated', true).order('created_at', {ascending: false});
+        const { data, error } = await supabaseClient.from('gallery').select('*, users!inner(full_name)').eq('is_moderated', true).order('created_at', {ascending: false});
         if(error || !data || data.length === 0) {
             feed.innerHTML = '<p class="text-center text-white pt-24">Нет доступных материалов</p>';
             return;
         }
 
         data.forEach(item => {
+            const userName = item.users.full_name && item.users.full_name.text ? item.users.full_name.text : 'резидент';
             const section = document.createElement('section');
             section.className = "relative h-screen w-full flex flex-col justify-end snap-start";
             section.innerHTML = `
-                <img alt="Reel" class="absolute inset-0 w-full h-[100dvh] object-cover" src="${item.image_url}"/>
+                <img alt="Reel" class="absolute inset-0 w-full h-[100dvh] object-cover" src="${item.photo_url}"/>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                 
                 <div class="relative w-full px-6 pb-32 flex justify-between items-end">
                     <div class="max-w-[70%] mb-4">
                         <div class="flex items-center gap-3 mb-2">
-                            <p class="font-label font-bold text-sm text-secondary">@${item.users.name.replace(/\s+/g,'_').toLowerCase()}</p>
+                            <p class="font-label font-bold text-sm text-secondary">@${userName.replace(/\s+/g,'_').toLowerCase()}</p>
                         </div>
-                        <h2 class="font-headline italic text-xl text-white leading-tight drop-shadow-lg">${item.description}</h2>
+                        <h2 class="font-headline italic text-xl text-white leading-tight drop-shadow-lg">${item.caption || ''}</h2>
                     </div>
                     <div class="flex flex-col gap-6 items-center">
-                        <button class="group flex flex-col items-center gap-1" onclick="app.toggleLike(${item.id})">
+                        <button class="group flex flex-col items-center gap-1" onclick="app.toggleLike('${item.id}')">
                             <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
                                 <span class="material-symbols-outlined text-white" id="like-icon-${item.id}" data-icon="favorite">favorite</span>
                             </div>
                         </button>
-                        <button class="group flex flex-col items-center gap-1" onclick="app.saveBookmark(${item.id})">
+                        <button class="group flex flex-col items-center gap-1" onclick="app.saveBookmark('${item.id}')">
                             <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
                                 <span class="material-symbols-outlined text-white" data-icon="bookmark_add">bookmark_add</span>
                             </div>
@@ -485,21 +483,17 @@ const app = {
         btn.disabled = true;
 
         try {
-            // Upload to storage (Assume configured bucket 'gallery_bucket')
             const ext = file.name.split('.').pop();
             const fName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
             const { error: sE } = await supabaseClient.storage.from('gallery_bucket').upload(fName, file);
-            
             if(sE) throw sE;
             
             const { data } = supabaseClient.storage.from('gallery_bucket').getPublicUrl(fName);
-            const pubUrl = data.publicUrl;
 
-            // Insert unmoderated to DB
             await supabaseClient.from('gallery').insert({
-                user_id: this.user.id,
-                description: desc,
-                image_url: pubUrl,
+                user_id: this.user.tg_id,
+                caption: desc,
+                photo_url: data.publicUrl,
                 is_moderated: false
             });
 
@@ -521,22 +515,23 @@ const app = {
         }
     },
 
-    async toggleLike(id) {
-        let el = document.getElementById(`like-icon-${id}`);
+    async toggleLike(photo_id) {
+        let el = document.getElementById(`like-icon-${photo_id}`);
         if(el.classList.contains('text-tertiary')) {
             el.classList.remove('text-tertiary', 'fill-icon');
             el.classList.add('text-white');
             el.style.fontVariationSettings = "'FILL' 0";
+            await supabaseClient.from('photo_likes').delete().eq('user_id', this.user.tg_id).eq('photo_id', photo_id);
         } else {
             el.classList.add('text-tertiary', 'fill-icon');
             el.classList.remove('text-white');
             el.style.fontVariationSettings = "'FILL' 1";
-            // Fire async request silently to track like in DB
+            await supabaseClient.from('photo_likes').insert({ user_id: this.user.tg_id, photo_id: photo_id });
         }
     },
 
-    async saveBookmark(gallery_id) {
-        await supabaseClient.from('bookmarks').insert({ user_id: this.user.id, gallery_id });
+    async saveBookmark(photo_id) {
+        await supabaseClient.from('bookmarks').insert({ user_id: this.user.tg_id, photo_id: photo_id });
         if(window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         } else {
@@ -547,7 +542,7 @@ const app = {
     async loadBookmarks() {
         const grid = document.getElementById('bookmarks-grid');
         grid.innerHTML = '<p>Загрузка...</p>';
-        const { data } = await supabaseClient.from('bookmarks').select('gallery(*)').eq('user_id', this.user.id);
+        const { data } = await supabaseClient.from('bookmarks').select('gallery(*)').eq('user_id', this.user.tg_id);
         if(!data || data.length === 0) {
             grid.innerHTML = `<p class="col-span-2 text-center text-on-surface-variant pt-10">Нет закладок</p>`;
             return;
@@ -558,9 +553,9 @@ const app = {
             const item = document.createElement('div');
             item.className = "w-full aspect-square rounded-xl overflow-hidden relative shadow bg-surface-container";
             item.innerHTML = `
-                <img src="${bm.gallery.image_url}" class="w-full h-full object-cover opacity-80" />
+                <img src="${bm.gallery.photo_url}" class="w-full h-full object-cover opacity-80" />
                 <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2 text-xs truncate">
-                    ${bm.gallery.description}
+                    ${bm.gallery.caption || ''}
                 </div>
             `;
             grid.appendChild(item);
@@ -579,9 +574,9 @@ const app = {
         const img = document.getElementById('ac-img').value;
 
         await supabaseClient.from('posts').insert({
-            title: t,
-            content: txt,
-            image_url: img || null
+            author_id: this.user.tg_id,
+            image_url: img || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600',
+            text_content: JSON.stringify({ title: t, content: txt })
         });
         alert('Запись опубликована!');
         e.target.reset();
@@ -594,7 +589,7 @@ const app = {
         const end = document.getElementById('aq-endtime').value;
 
         try {
-            JSON.parse(qJson); // Validate JSON
+            JSON.parse(qJson);
             await supabaseClient.from('quizzes').insert({
                 title: t,
                 questions: qJson,
@@ -610,7 +605,7 @@ const app = {
     async loadModerationFeed() {
         const dom = document.getElementById('mod-feed');
         dom.innerHTML = 'Загрузка...';
-        const { data } = await supabaseClient.from('gallery').select('*, users!inner(name)').eq('is_moderated', false);
+        const { data } = await supabaseClient.from('gallery').select('*, users!inner(full_name)').eq('is_moderated', false);
         document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
         
         if(!data || data.length === 0) {
@@ -623,16 +618,16 @@ const app = {
             dom.innerHTML += `
             <div class="bg-surface-container-low rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
                 <div class="h-40 relative">
-                    <img src="${item.image_url}" class="w-full h-full object-cover" />
+                    <img src="${item.photo_url}" class="w-full h-full object-cover" />
                     <div class="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-white">ID: ${item.id}</div>
                 </div>
                 <div class="p-4 flex flex-col gap-4">
                     <div class="flex justify-between items-start">
-                        <span class="text-xs font-medium text-on-surface">${item.description}</span>
+                        <span class="text-xs font-medium text-on-surface">${item.caption || ''}</span>
                     </div>
                 <div class="flex gap-2">
-                    <button class="flex-1 py-2 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg text-xs font-bold hover:bg-secondary/30 transition-colors" onclick="app.modAction(${item.id}, 'approve')">Одобрить</button>
-                    <button class="flex-1 py-2 bg-error/10 text-error border border-error/20 rounded-lg text-xs font-bold hover:bg-error/20 transition-colors" onclick="app.modAction(${item.id}, 'delete')">Удалить</button>
+                    <button class="flex-1 py-2 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg text-xs font-bold hover:bg-secondary/30 transition-colors" onclick="app.modAction('${item.id}', 'approve')">Одобрить</button>
+                    <button class="flex-1 py-2 bg-error/10 text-error border border-error/20 rounded-lg text-xs font-bold hover:bg-error/20 transition-colors" onclick="app.modAction('${item.id}', 'delete')">Удалить</button>
                 </div>
                 </div>
             </div>`;
@@ -669,7 +664,7 @@ app.checkUser = async function() {
     try {
         const uid = tg.initDataUnsafe?.user?.id;
         if(!uid) throw new Error("No user id, falling back to onboarding");
-        const { data, error } = await supabaseClient.from('users').select('*').eq('id', uid).single();
+        const { data, error } = await supabaseClient.from('users').select('*').eq('tg_id', uid).single();
         if(data) {
             this.user = data;
             this.bootMainApp();
