@@ -450,9 +450,13 @@ const app = {
         if(!quiz) return;
         
         try {
+            let parsedQ = typeof quiz.questions === 'string' ? JSON.parse(quiz.questions) : quiz.questions;
+            if(typeof parsedQ === 'string') parsedQ = JSON.parse(parsedQ); // double unwrap
+            if(!Array.isArray(parsedQ)) parsedQ = [parsedQ]; // catch if they pasted object without []
+
             this.currentQuiz = {
                 data: quiz,
-                questions: typeof quiz.questions === 'string' ? JSON.parse(quiz.questions) : quiz.questions,
+                questions: parsedQ,
                 index: 0,
                 score: 0
             };
@@ -723,12 +727,13 @@ const app = {
         const durationHours = parseInt(document.getElementById('aq-duration-hours').value) || 24;
 
         try {
-            JSON.parse(qJson);
+            let qObj = JSON.parse(qJson);
+            if(!Array.isArray(qObj)) qObj = [qObj];
             const endTimeIso = new Date(Date.now() + durationHours * 3600000).toISOString();
             
             await supabaseClient.from('quizzes').insert({
                 title: t,
-                questions: qJson,
+                questions: qObj,
                 end_time: endTimeIso
             });
             alert('Квиз сохранен и уже запущен!');
