@@ -139,8 +139,6 @@ const app = {
             const totalScore = qRes ? qRes.reduce((a, b) => a + b.score, 0) : 0;
             this.user.points = totalScore;
             
-            document.getElementById('header-points').textContent = totalScore + " очк.";
-            document.getElementById('header-points').classList.remove('hidden');
             document.getElementById('user-total-score').textContent = totalScore;
 
             // Update Avatar Name
@@ -533,7 +531,6 @@ const app = {
         // Add to local UI points
         const newPts = (this.user.points || 0) + addedScore;
         this.user.points = newPts;
-        document.getElementById('header-points').textContent = newPts + " очк.";
         document.getElementById('user-total-score').textContent = newPts;
         
         this.closeQuiz();

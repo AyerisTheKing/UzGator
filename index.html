@@ -18,60 +18,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css" />
-    <!-- Тёмный стиль: inset box-shadow перекрывает белый фон браузера -->
-    <style>
-        :root { color-scheme: dark; }
-        /* Inset-shadow trick: закрашивает белый фон браузера тёмным */
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="search"],
-        input[type="tel"],
-        input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
-        textarea {
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            /* Перекрываем white через огромный inset box-shadow */
-            box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
-            -webkit-box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
-            background-color: transparent !important;
-            color: #e8ddc4 !important;
-            border: 1px solid rgba(201, 162, 39, 0.25) !important;
-            border-radius: 0.75rem !important;
-            caret-color: #c9a227 !important;
-        }
-        input::placeholder,
-        textarea::placeholder {
-            color: rgba(201, 162, 39, 0.4) !important;
-            opacity: 1 !important;
-        }
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none !important;
-            border-color: rgba(201, 162, 39, 0.55) !important;
-        }
-        /* Автозаполнение */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
-            box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
-            -webkit-text-fill-color: #e8ddc4 !important;
-        }
-        select {
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            background-color: rgba(38, 35, 58, 0.92) !important;
-            color: #e8ddc4 !important;
-            border: 1px solid rgba(201, 162, 39, 0.25) !important;
-        }
-        select option {
-            background-color: #3e345e !important;
-            color: #e8ddc4 !important;
-        }
-    </style>
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -254,8 +200,8 @@
 
         <!-- ── ГЛАВНЫЙ ЗАГОЛОВОК ── -->
         <header id="main-header"
-                class="absolute top-0 w-full flex justify-between items-center px-5 pt-14 pb-4 z-50 backdrop-blur-xl"
-                style="background: linear-gradient(180deg, rgba(38,35,58,0.95) 0%, rgba(38,35,58,0.0) 100%);">
+                class="absolute top-0 w-full flex justify-between items-center px-5 pb-4 z-50 backdrop-blur-xl"
+                style="padding-top: max(3.5rem, calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + 1rem)); background: linear-gradient(180deg, rgba(38,35,58,0.95) 0%, rgba(38,35,58,0.0) 100%);">
             <div class="flex items-center gap-3">
                 <!-- Аватар с золотым ободком -->
                 <div class="w-9 h-9 rounded-full overflow-hidden shadow-inner"
@@ -269,19 +215,12 @@
                     <span class="font-headline text-sm font-bold text-parchment-dim tracking-wide"> Амира Темура</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                     style="background: rgba(201,162,39,0.1); border: 1px solid rgba(201,162,39,0.25);">
-                    <span class="material-symbols-outlined text-gold text-base" data-icon="military_tech">military_tech</span>
-                    <span id="header-points" class="font-body text-gold text-xs font-bold hidden">0 очк.</span>
-                </div>
-            </div>
         </header>
 
         <!-- ── ЗАГОЛОВОК ГАЛЕРЕИ ── -->
         <header id="gallery-header"
-                class="hidden absolute top-0 w-full z-50 flex justify-between items-center px-5 pt-16 pb-6"
-                style="background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);">
+                class="hidden absolute top-0 w-full z-50 flex justify-between items-center px-5 pb-6"
+                style="padding-top: max(4rem, calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + 1rem)); background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);">
             <button id="btn-bookmarks"
                     class="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md transition-colors"
                     style="background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3);">
@@ -758,36 +697,8 @@
         <p class="font-serif italic text-parchment-dim/40 text-xs mt-2">Наследие Амира Темура</p>
     </div>
 
-    <script src="script.js?v=3.3"></script>
-    <script src="app.js?v=3.3"></script>
-    <!-- Тёмный фон input: JS-хак против user-agent stylesheet Chromium -->
-    <script>
-    (function forceDarkInputs() {
-        const DARK_BG = 'rgba(38,35,58,0.95)';
-        const STYLE   = `background-color:${DARK_BG}!important;` +
-                        `color:#e8ddc4!important;` +
-                        `border:1px solid rgba(201,162,39,0.25)!important;` +
-                        `border-radius:0.75rem!important;` +
-                        `caret-color:#c9a227!important;`;
-        function applyToAll() {
-            document.querySelectorAll('input:not([type=file]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=button]):not([type=reset]), textarea')
-                .forEach(el => {
-                    el.style.setProperty('background-color', DARK_BG, 'important');
-                    el.style.setProperty('color',            '#e8ddc4', 'important');
-                    el.style.setProperty('border', '1px solid rgba(201,162,39,0.25)', 'important');
-                    el.style.setProperty('border-radius', '0.75rem', 'important');
-                    el.style.setProperty('caret-color', '#c9a227', 'important');
-                });
-        }
-        // При первой загрузке
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', applyToAll);
-        } else {
-            applyToAll();
-        }
-        // Наблюдатель: при появлении динамических элементов
-        new MutationObserver(applyToAll).observe(document.body, { childList: true, subtree: true });
-    })();
-    </script>
+    <script src="script.js?v=3.5"></script>
+    <script src="app.js?v=3.5"></script>
+
 </body>
 </html>
