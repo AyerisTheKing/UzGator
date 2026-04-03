@@ -3,19 +3,75 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-    <meta name="theme-color" content="#0b1326">
+    <meta name="theme-color" content="#0d0b18">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Наследие Амира Темура</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind БЕЗ forms plugin чтобы не перебивал стили инпутов -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <!-- Исторические шрифты: Cinzel (латиница/заголовки) + Noto Serif (тело текста) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css" />
+    <!-- Тёмный стиль: inset box-shadow перекрывает белый фон браузера -->
+    <style>
+        :root { color-scheme: dark; }
+        /* Inset-shadow trick: закрашивает белый фон браузера тёмным */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="search"],
+        input[type="tel"],
+        input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+        textarea {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            /* Перекрываем white через огромный inset box-shadow */
+            box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            -webkit-box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            background-color: transparent !important;
+            color: #e8ddc4 !important;
+            border: 1px solid rgba(201, 162, 39, 0.25) !important;
+            border-radius: 0.75rem !important;
+            caret-color: #c9a227 !important;
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(201, 162, 39, 0.4) !important;
+            opacity: 1 !important;
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none !important;
+            border-color: rgba(201, 162, 39, 0.55) !important;
+        }
+        /* Автозаполнение */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            -webkit-text-fill-color: #e8ddc4 !important;
+        }
+        select {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            background-color: rgba(13, 11, 24, 0.92) !important;
+            color: #e8ddc4 !important;
+            border: 1px solid rgba(201, 162, 39, 0.25) !important;
+        }
+        select option {
+            background-color: #1c1530 !important;
+            color: #e8ddc4 !important;
+        }
+    </style>
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -23,356 +79,471 @@
             theme: {
                 extend: {
                     colors: {
-                        "surface-tint": "#b5c4ff",
-                        "on-primary": "#00287d",
-                        "surface-container-highest": "#2d3449",
-                        "surface": "#0b1326",
-                        "on-background": "#dae2fd",
-                        "on-secondary": "#003732",
-                        "on-secondary-fixed": "#00201d",
-                        "secondary-container": "#00c6b6",
-                        "surface-bright": "#31394d",
-                        "inverse-surface": "#dae2fd",
-                        "primary-fixed": "#dce1ff",
-                        "on-secondary-fixed-variant": "#005049",
-                        "surface-container-low": "#131b2e",
-                        "on-surface-variant": "#c4c5d5",
-                        "surface-dim": "#0b1326",
-                        "outline-variant": "#444653",
-                        "tertiary": "#e9c400",
-                        "secondary-fixed": "#61f9e9",
-                        "primary-fixed-dim": "#b5c4ff",
-                        "on-error": "#690005",
-                        "tertiary-container": "#c9a900",
-                        "on-secondary-container": "#004c46",
-                        "on-primary-fixed": "#00164e",
-                        "background": "#0b1326",
-                        "outline": "#8e909e",
-                        "surface-container-lowest": "#060e20",
-                        "secondary-fixed-dim": "#3adccc",
-                        "on-tertiary-fixed-variant": "#544600",
-                        "inverse-on-surface": "#283044",
-                        "on-error-container": "#ffdad6",
-                        "secondary": "#43e2d2",
-                        "surface-container": "#171f33",
-                        "tertiary-fixed-dim": "#e9c400",
-                        "surface-variant": "#2d3449",
-                        "primary": "#b5c4ff",
-                        "error-container": "#93000a",
-                        "primary-container": "#003399",
-                        "on-primary-fixed-variant": "#153ea3",
-                        "inverse-primary": "#3557bc",
-                        "on-surface": "#dae2fd",
-                        "tertiary-fixed": "#ffe16d",
-                        "on-tertiary-fixed": "#221b00",
-                        "error": "#ffb4ab",
-                        "on-tertiary": "#3a3000",
-                        "on-primary-container": "#8aa4ff",
-                        "surface-container-high": "#222a3d",
-                        "on-tertiary-container": "#4c3e00"
+                        /* ══ ТИМУРИДСКАЯ ПАЛИТРА ══ */
+                        /* Фон */
+                        "void":          "#0d0b18",   /* глубокий фон */
+                        "midnight":      "#130f26",   /* чуть светлее */
+                        "dusk":          "#1c1530",   /* карточки */
+                        "twilight":      "#251c3e",   /* приподнятые карточки */
+                        "shadow":        "#2e2452",   /* поверхность акцент */
+
+                        /* Золото */
+                        "gold":          "#c9a227",   /* основное золото */
+                        "gold-light":    "#f5d67a",   /* светлое золото */
+                        "gold-dark":     "#8a6b18",   /* тёмное золото */
+                        "gold-muted":    "#6b550f",   /* приглушённое золото */
+
+                        /* Ляпис-лазурь */
+                        "lapis":         "#1a5c9e",   /* синий лазурит */
+                        "lapis-light":   "#4a8fd4",   /* светлый лазурит */
+                        "lapis-pale":    "#a8c8f0",   /* бледный лазурит */
+
+                        /* Терракота / Рубин */
+                        "ruby":          "#8b1a2a",   /* рубиново-красный */
+                        "ruby-light":    "#c44a5a",   /* светлый рубин */
+
+                        /* Текст */
+                        "parchment":     "#e8ddc4",   /* цвет пергамента */
+                        "parchment-dim": "#b5a882",   /* приглушённый пергамент */
+                        "ink":           "#6b6050",   /* тёмный текст */
+
+                        /* Ошибки */
+                        "error-imp":     "#c44a5a",
+                        "error-dark":    "#5c1520",
                     },
                     fontFamily: {
-                        "headline": ["Noto Serif", "serif"],
-                        "body": ["Manrope", "sans-serif"],
-                        "label": ["Manrope", "sans-serif"],
-                        "notoSerif": ["Noto Serif", "serif"],
-                        "manrope": ["Manrope", "sans-serif"]
+                        "headline": ["Cinzel", "Georgia", "serif"],
+                        "serif":    ["Noto Serif", "Georgia", "serif"],
+                        "body":     ["Manrope", "sans-serif"],
                     },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg":      "0.5rem",
+                        "xl":      "0.75rem",
+                        "2xl":     "1rem",
+                        "3xl":     "1.5rem",
+                        "full":    "9999px"
+                    },
                 },
             },
         }
     </script>
 </head>
-<body class="bg-background text-on-background font-body h-screen flex flex-col overflow-hidden relative">
+<body class="bg-void text-parchment font-serif h-screen flex flex-col overflow-hidden relative">
     
-    <!-- Background Design -->
+    <!-- ══ ОРНАМЕНТАЛЬНЫЙ ФОН ══ -->
     <div class="fixed inset-0 arabesque-pattern pointer-events-none z-[-2]"></div>
-    <div class="fixed top-0 left-0 w-full h-1/4 imperial-header-gradient opacity-60 pointer-events-none z-[-1]"></div>
+    <!-- Верхний виньетка -->
+    <div class="fixed top-0 left-0 w-full h-1/3 imperial-header-gradient opacity-80 pointer-events-none z-[-1]"></div>
+    <!-- Нижний виньетка -->
+    <div class="fixed bottom-0 left-0 w-full h-1/4 pointer-events-none z-[-1]"
+         style="background: linear-gradient(0deg, #0d0b18 0%, transparent 100%);"></div>
 
-    <!-- Onboarding Screen -->
-    <div id="screen-onboarding" class="absolute inset-0 z-50 flex flex-col pb-24 overflow-y-auto no-scrollbar pt-20 items-center px-6" style="display: none;">
-        <header class="text-center mb-12 flex-shrink-0">
-            <div class="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-surface-container-high shadow-2xl shadow-black/40">
-                <span class="material-symbols-outlined text-tertiary text-4xl" data-icon="history_edu">history_edu</span>
+    <!-- ══ ЭКРАН ОНБОРДИНГА ══ -->
+    <div id="screen-onboarding" class="absolute inset-0 z-50 flex flex-col pb-24 overflow-y-auto no-scrollbar pt-16 items-center px-6" style="display: none;">
+        
+        <!-- Заголовок -->
+        <header class="text-center mb-10 flex-shrink-0">
+            <!-- Декоративная эмблема -->
+            <div class="relative inline-flex items-center justify-center mb-6">
+                <!-- Внешнее кольцо -->
+                <div class="absolute w-24 h-24 rounded-full"
+                     style="border: 1px solid rgba(201,162,39,0.3); animation: pulse-glow 3s ease-in-out infinite;"></div>
+                <!-- Средний ободок -->
+                <div class="absolute w-20 h-20 rounded-full"
+                     style="border: 1px solid rgba(201,162,39,0.5);"></div>
+                <!-- Центр -->
+                <div class="w-16 h-16 rounded-full flex items-center justify-center"
+                     style="background: linear-gradient(135deg, #2a1f5a, #1a1338); border: 1px solid rgba(201,162,39,0.6);">
+                    <span class="material-symbols-outlined text-gold text-3xl" data-icon="history_edu">history_edu</span>
+                </div>
             </div>
-            <h1 class="font-headline text-3xl font-bold italic text-on-surface mb-2">Добро пожаловать в Летопись</h1>
-            <p class="text-on-surface-variant font-medium tracking-wide text-sm opacity-80 uppercase">Наследие Амира Темура</p>
+
+            <h1 class="font-headline text-2xl font-bold text-gold-light mb-2 tracking-wider">
+                Добро пожаловать
+            </h1>
+            <!-- Декоративный разделитель -->
+            <div class="divider-ornament my-3 mx-auto max-w-xs">
+                <span class="text-gold text-xs">✦</span>
+            </div>
+            <p class="text-parchment-dim font-body text-xs tracking-[0.2em] uppercase">
+                Летопись · Наследие Амира Темура
+            </p>
         </header>
 
-        <section class="w-full max-w-md bg-surface-container-low rounded-3xl p-8 shadow-2xl relative overflow-hidden flex-shrink-0">
-            <div class="absolute inset-0 border border-white/5 rounded-3xl pointer-events-none"></div>
-            <form id="onboarding-form" class="space-y-8">
+        <!-- Форма регистрации -->
+        <section class="w-full max-w-md rounded-2xl p-7 relative overflow-hidden flex-shrink-0"
+                 style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.08);">
+            
+            <!-- Угловые орнаменты -->
+            <div class="absolute top-3 left-3 w-5 h-5 pointer-events-none opacity-40"
+                 style="border-top: 1px solid #c9a227; border-left: 1px solid #c9a227;"></div>
+            <div class="absolute top-3 right-3 w-5 h-5 pointer-events-none opacity-40"
+                 style="border-top: 1px solid #c9a227; border-right: 1px solid #c9a227;"></div>
+            <div class="absolute bottom-3 left-3 w-5 h-5 pointer-events-none opacity-40"
+                 style="border-bottom: 1px solid #c9a227; border-left: 1px solid #c9a227;"></div>
+            <div class="absolute bottom-3 right-3 w-5 h-5 pointer-events-none opacity-40"
+                 style="border-bottom: 1px solid #c9a227; border-right: 1px solid #c9a227;"></div>
+
+            <form id="onboarding-form" class="space-y-6">
+                <!-- Имя -->
                 <div class="space-y-2">
-                    <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Имя и Фамилия</label>
-                    <div class="relative group">
-                        <input id="on-name" required class="w-full bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface placeholder:text-outline/40 focus:ring-0 transition-all duration-300" placeholder="Амир Темур" type="text"/>
-                        <div class="absolute bottom-0 left-0 h-0.5 w-0 bg-secondary group-focus-within:w-full transition-all duration-500"></div>
+                    <label class="block font-body text-xs text-gold/60 ml-1 uppercase tracking-wider">Имя и Фамилия</label>
+                    <div class="relative">
+                        <input id="on-name" required
+                               class="input-imperial w-full rounded-xl py-4 px-5 text-sm"
+                               style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);caret-color:#c9a227;"
+                               placeholder="Амир Темур" type="text"/>
                     </div>
                 </div>
 
+                <!-- Класс и Буква -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
-                        <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Класс</label>
+                        <label class="block font-body text-xs text-gold/60 ml-1 uppercase tracking-wider">Класс</label>
                         <div class="relative">
-                            <select id="on-class" class="w-full appearance-none bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface focus:ring-0">
+                            <select id="on-class"
+                                    class="input-imperial w-full appearance-none rounded-xl py-4 px-5 text-sm"
+                                    style="background-color:rgba(13,11,24,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
                                 <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
                                 <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                                 <option selected>11</option>
                             </select>
-                            <span class="material-symbols-outlined absolute right-4 top-4 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+                            <span class="material-symbols-outlined absolute right-4 top-4 text-gold-muted pointer-events-none text-sm" data-icon="expand_more">expand_more</span>
                         </div>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="block font-label text-sm text-primary-fixed-dim/70 ml-1">Буква</label>
+                        <label class="block font-body text-xs text-gold/60 ml-1 uppercase tracking-wider">Буква</label>
                         <div class="relative">
-                            <select id="on-letter" class="w-full appearance-none bg-surface-container-lowest border-none rounded-xl py-4 px-5 text-on-surface focus:ring-0">
+                            <select id="on-letter"
+                                    class="input-imperial w-full appearance-none rounded-xl py-4 px-5 text-sm"
+                                    style="background-color:rgba(13,11,24,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
                                 <option selected>А</option><option>Б</option><option>В</option><option>Г</option><option>Д</option><option>И</option>
                             </select>
-                            <span class="material-symbols-outlined absolute right-4 top-4 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+                            <span class="material-symbols-outlined absolute right-4 top-4 text-gold-muted pointer-events-none text-sm" data-icon="expand_more">expand_more</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="w-full py-4 px-6 rounded-xl bg-gradient-to-br from-primary-container to-primary text-on-primary font-bold text-lg shadow-lg shadow-primary-container/20 active:scale-95 transition-all duration-150 relative group">
-                        <span class="relative z-10">Зарегистрироваться</span>
-                        <div class="absolute inset-x-0 top-0 h-px bg-tertiary/30 rounded-t-xl"></div>
+                <!-- Кнопка -->
+                <div class="pt-2">
+                    <button type="submit"
+                            class="w-full py-4 px-6 rounded-xl font-headline font-bold text-sm tracking-wider relative overflow-hidden group active:scale-95 transition-all duration-150"
+                            style="background: linear-gradient(135deg, #c9a227 0%, #8a6b18 100%); color: #0d0b18; box-shadow: 0 8px 24px rgba(201,162,39,0.3);">
+                        <span class="relative z-10">Вступить в Летопись</span>
+                        <div class="absolute inset-0 opacity-0 group-active:opacity-20 bg-black transition-opacity"></div>
                     </button>
                 </div>
             </form>
         </section>
 
-        <footer class="mt-12 text-center max-w-xs flex-shrink-0">
-            <p class="font-headline italic text-tertiary/60 text-sm leading-relaxed">
-                "Справедливость — это не только основа власти, но и свет, освещающий путь летописца."
-            </p>
-            <div class="mt-6 flex justify-center space-x-2">
-                <div class="w-1.5 h-1.5 rounded-full bg-secondary/40"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-tertiary/40"></div>
-                <div class="w-1.5 h-1.5 rounded-full bg-secondary/40"></div>
+        <!-- Цитата -->
+        <footer class="mt-10 text-center max-w-xs flex-shrink-0">
+            <div class="divider-ornament my-4 mx-auto">
+                <span class="text-gold text-xs">✦</span>
             </div>
+            <p class="font-serif italic text-gold/50 text-xs leading-relaxed">
+                «Справедливость — основа власти, и свет, освещающий путь летописца.»
+            </p>
         </footer>
     </div>
 
-    <!-- Main Screens Container -->
+    <!-- ══ ГЛАВНЫЕ ЭКРАНЫ ══ -->
     <div id="screen-main" style="display: none;" class="w-full h-full flex flex-col relative z-10">
-        <!-- Main Top Header -->
-        <header id="main-header" class="absolute top-0 w-full flex justify-between items-center px-6 pt-14 pb-4 bg-gradient-to-b from-[#003399]/90 to-transparent dark:bg-[#0b1326]/80 backdrop-blur-xl z-50">
+
+        <!-- ── ГЛАВНЫЙ ЗАГОЛОВОК ── -->
+        <header id="main-header"
+                class="absolute top-0 w-full flex justify-between items-center px-5 pt-14 pb-4 z-50 backdrop-blur-xl"
+                style="background: linear-gradient(180deg, rgba(13,11,24,0.95) 0%, rgba(13,11,24,0.0) 100%);">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full border-2 border-tertiary/30 overflow-hidden shadow-inner">
-                    <img id="header-avatar" alt="Profile" class="w-full h-full object-cover" src="https://ui-avatars.com/api/?name=User&background=003399&color=e9c400"/>
+                <!-- Аватар с золотым ободком -->
+                <div class="w-9 h-9 rounded-full overflow-hidden shadow-inner"
+                     style="border: 1.5px solid rgba(201,162,39,0.5);">
+                    <img id="header-avatar" alt="Profile"
+                         class="w-full h-full object-cover"
+                         src="https://ui-avatars.com/api/?name=A&background=1a1338&color=c9a227"/>
                 </div>
-                <span class="font-notoSerif text-lg font-bold text-[#e9c400]">Наследие Амира Темура</span>
+                <div>
+                    <span class="font-headline text-sm font-bold text-gold-light tracking-wide">Наследие</span>
+                    <span class="font-headline text-sm font-bold text-parchment-dim tracking-wide"> Амира Темура</span>
+                </div>
             </div>
-            <div class="flex items-center gap-4">
-                <span id="header-points" class="font-bold text-secondary text-sm hidden">0 очк.</span>
-                <span class="material-symbols-outlined text-[#b5c4ff] text-2xl" id="header-icon" data-icon="military_tech">military_tech</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                     style="background: rgba(201,162,39,0.1); border: 1px solid rgba(201,162,39,0.25);">
+                    <span class="material-symbols-outlined text-gold text-base" data-icon="military_tech">military_tech</span>
+                    <span id="header-points" class="font-body text-gold text-xs font-bold hidden">0 очк.</span>
+                </div>
             </div>
         </header>
 
-        <!-- Gallery Header (Overlay on Reels) -->
-        <header id="gallery-header" class="hidden absolute top-0 w-full z-50 flex justify-between items-center px-6 pt-16 pb-6 bg-gradient-to-b from-black/60 to-transparent">
-            <button id="btn-bookmarks" class="flex items-center gap-2 bg-surface-container-highest/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 hover:bg-surface-container-highest transition-colors">
-                <span class="material-symbols-outlined text-tertiary text-xl" data-icon="bookmarks">bookmarks</span>
-                <span class="font-label text-sm font-medium tracking-wide text-white">Закладки</span>
+        <!-- ── ЗАГОЛОВОК ГАЛЕРЕИ ── -->
+        <header id="gallery-header"
+                class="hidden absolute top-0 w-full z-50 flex justify-between items-center px-5 pt-16 pb-6"
+                style="background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);">
+            <button id="btn-bookmarks"
+                    class="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md transition-colors"
+                    style="background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3);">
+                <span class="material-symbols-outlined text-gold text-lg" data-icon="bookmarks">bookmarks</span>
+                <span class="font-body text-xs font-semibold text-parchment tracking-wide">Закладки</span>
             </button>
-            <div class="flex items-center gap-4">
-                <button id="btn-add-photo" class="w-10 h-10 flex items-center justify-center rounded-full bg-tertiary text-on-tertiary shadow-lg shadow-tertiary/20 hover:scale-105 transition-transform active:scale-95 relative">
-                    <span class="material-symbols-outlined" data-icon="add">add</span>
-                    <!-- Hidden File Input -->
+            <div class="flex items-center gap-3">
+                <button id="btn-add-photo"
+                        class="w-10 h-10 flex items-center justify-center rounded-full relative transition-transform active:scale-95"
+                        style="background: linear-gradient(135deg, #c9a227, #8a6b18); box-shadow: 0 4px 16px rgba(201,162,39,0.4);">
+                    <span class="material-symbols-outlined text-void" data-icon="add">add</span>
                     <input type="file" id="upload-reel-file" accept="image/*" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer hidden">
                 </button>
             </div>
         </header>
 
-        <!-- Main Workspace (Tab Content) -->
+        <!-- ══ РАБОЧАЯ ОБЛАСТЬ (ВКЛАДКИ) ══ -->
         <main class="flex-1 min-h-0 w-full pt-32 pb-24 overflow-y-auto no-scrollbar scroll-smooth" id="main-content-area">
-            
-            <!-- TAB 1: Chronicle -->
-            <div id="tab-chronicle" class="tab-content relative px-4 max-w-2xl mx-auto pt-4" style="display: none;">
-                <div class="mb-10 text-center">
-                    <h1 class="font-notoSerif text-4xl italic font-bold text-tertiary mb-2">Летопись Империи</h1>
-                    <p class="text-on-surface-variant font-manrope text-sm tracking-widest uppercase">Хроники завоеваний и созидания</p>
+
+            <!-- ── ВКЛАДКА 1: ЛЕТОПИСЬ ── -->
+            <div id="tab-chronicle" class="tab-content relative px-4 max-w-2xl mx-auto pt-2" style="display: none;">
+                
+                <!-- Заголовок секции -->
+                <div class="mb-8 text-center">
+                    <p class="font-body text-gold/50 text-[10px] tracking-[0.3em] uppercase mb-2">Хроники завоеваний</p>
+                    <h1 class="font-headline text-3xl font-bold text-gold-light mb-3 tracking-wide">Летопись Империи</h1>
+                    <div class="divider-ornament mx-auto max-w-xs">
+                        <span class="text-gold text-xs">✦</span>
+                    </div>
                 </div>
-                <div id="chronicle-feed" class="space-y-8">
-                    <!-- Posts will be generated here -->
+
+                <div id="chronicle-feed" class="space-y-6">
+                    <!-- Посты генерируются JS -->
                 </div>
             </div>
 
-            <!-- TAB 2: Quizzes -->
-            <div id="tab-quizzes" class="tab-content relative px-6 max-w-2xl mx-auto pt-4" style="display: none;">
-                <section class="mb-8 p-6 rounded-xl bg-surface-container-high relative overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.4)]">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <span class="material-symbols-outlined text-8xl" data-icon="cognition">cognition</span>
+            <!-- ── ВКЛАДКА 2: ИСПЫТАНИЯ ── -->
+            <div id="tab-quizzes" class="tab-content relative px-5 max-w-2xl mx-auto pt-2" style="display: none;">
+                
+                <!-- Карточка достижений -->
+                <section class="mb-6 p-6 rounded-2xl relative overflow-hidden"
+                         style="background: linear-gradient(145deg, #251c3e, #1e1635); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
+                    <!-- Декоративный фон -->
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <span class="material-symbols-outlined text-gold" style="font-size:96px;" data-icon="cognition">cognition</span>
                     </div>
                     <div class="relative z-10">
-                        <h2 class="font-headline text-2xl italic text-primary mb-1">Ваши достижения</h2>
-                        <div class="flex items-end gap-2 mb-4">
-                            <span id="user-total-score" class="text-4xl font-bold text-tertiary">0</span>
-                            <span class="text-sm font-label text-on-surface-variant mb-1 uppercase tracking-widest">Очков</span>
+                        <p class="font-body text-gold/50 text-[10px] tracking-[0.2em] uppercase mb-1">Ваши достижения</p>
+                        <h2 class="font-headline text-lg text-parchment mb-3">Казна Знаний</h2>
+                        <div class="flex items-end gap-2">
+                            <span id="user-total-score" class="text-5xl font-bold text-gold-light" style="font-family:'Cinzel',serif;">0</span>
+                            <span class="font-body text-xs text-parchment-dim mb-2 uppercase tracking-widest">Очков</span>
                         </div>
                     </div>
                 </section>
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-headline text-xl italic text-on-background">Испытания</h3>
-                    <span id="quizzes-count" class="text-xs font-label text-secondary uppercase tracking-tighter">Всего: 0</span>
+
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-headline text-lg text-parchment tracking-wide">Испытания</h3>
+                    <span id="quizzes-count" class="font-body text-xs text-gold/60 uppercase tracking-wider">Всего: 0</span>
                 </div>
-                <div id="quizzes-feed" class="grid gap-6">
-                    <!-- Quizzes will be mapped here. Completed vs Active logic -->
+
+                <div id="quizzes-feed" class="grid gap-5">
+                    <!-- Квизы генерируются JS -->
                 </div>
             </div>
 
-            <!-- TAB 3: Gallery (Reels) -->
-            <div id="tab-gallery" class="tab-content absolute inset-0 z-40 bg-black pb-24 overflow-y-auto snap-y snap-mandatory no-scrollbar" style="display: none;">
+            <!-- ── ВКЛАДКА 3: ГАЛЕРЕЯ (REELS) ── -->
+            <div id="tab-gallery"
+                 class="tab-content absolute inset-0 z-40 pb-24 overflow-y-auto snap-y snap-mandatory no-scrollbar"
+                 style="display: none; background: #000;">
                 <div id="gallery-feed" class="w-full pb-20">
-                    <!-- Reels loaded here -->
+                    <!-- Рилсы загружаются JS -->
                 </div>
             </div>
 
-            <!-- TAB 4: Admin Panel -->
-            <div id="tab-admin" class="tab-content relative max-w-5xl mx-auto pt-4 pb-12" style="display: none;">
-                
-                <!-- Admin Sub-Tab Navigation -->
-                <div class="sticky top-0 z-10 px-4 pb-3 pt-1 bg-background/95 backdrop-blur-md border-b border-outline-variant/20 mb-4">
+            <!-- ── ВКЛАДКА 4: ПАНЕЛЬ АДМИНИСТРАТОРА ── -->
+            <div id="tab-admin" class="tab-content relative max-w-5xl mx-auto pt-2 pb-12" style="display: none;">
+
+                <!-- Навигация по под-вкладкам -->
+                <div class="sticky top-0 z-10 px-4 pb-3 pt-1 backdrop-blur-md border-b mb-4"
+                     style="background: rgba(13,11,24,0.95); border-color: rgba(201,162,39,0.15);">
                     <div class="flex gap-2">
-                        <button id="admin-sub-btn-manage" onclick="app.switchAdminTab('manage')"
-                            class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 bg-primary-container text-on-primary">
+                        <button id="admin-sub-btn-manage"
+                                onclick="app.switchAdminTab('manage')"
+                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18;">
                             <span class="material-symbols-outlined text-base" data-icon="settings">settings</span>
                             <span>Управление</span>
                         </button>
-                        <button id="admin-sub-btn-analytics" onclick="app.switchAdminTab('analytics')"
-                            class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 bg-surface-container text-on-surface-variant">
+                        <button id="admin-sub-btn-analytics"
+                                onclick="app.switchAdminTab('analytics')"
+                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                style="background: rgba(42,36,70,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
                             <span class="material-symbols-outlined text-base" data-icon="analytics">analytics</span>
                             <span>Аналитика</span>
                         </button>
-                        <button id="admin-sub-btn-moderation" onclick="app.switchAdminTab('moderation')"
-                            class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 bg-surface-container text-on-surface-variant">
-                            <span class="material-symbols-outlined text-base" data-icon="shield_check">shield_check</span>
+                        <button id="admin-sub-btn-moderation"
+                                onclick="app.switchAdminTab('moderation')"
+                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                style="background: rgba(42,36,70,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
                             <span>Модерация</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- SUB-TAB 1: MANAGEMENT -->
+                <!-- ── ПОД-ВКЛАДКА 1: УПРАВЛЕНИЕ ── -->
                 <div id="admin-panel-manage" class="admin-sub-panel px-4 space-y-5">
-                    <section class="bg-surface-container-low p-5 rounded-2xl shadow-xl border border-outline-variant/10">
+                    
+                    <!-- Форма: Создать летопись -->
+                    <section class="p-5 rounded-2xl shadow-xl"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-primary-container text-lg" data-icon="history_edu">history_edu</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="history_edu">history_edu</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Создать летопись</h2>
-                                <p class="text-xs text-on-surface-variant">Новая запись в хронику</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Создать летопись</h2>
+                                <p class="text-xs text-parchment-dim/60">Новая запись в хронику</p>
                             </div>
                         </div>
                         <form id="form-add-chronicle" class="space-y-3">
-                            <input id="ac-title" placeholder="Заголовок" required class="w-full bg-surface-container-lowest border-none rounded-xl p-3 outline-none focus:ring-2 focus:ring-secondary text-sm"/>
-                            <textarea id="ac-text" placeholder="Текст летописи..." required class="w-full bg-surface-container-lowest border-none rounded-xl p-3 outline-none resize-none focus:ring-2 focus:ring-secondary text-sm" rows="3"></textarea>
-                            <div class="relative w-full bg-surface-container-lowest rounded-xl p-3 border border-dashed border-outline-variant flex items-center justify-center hover:border-secondary transition-colors overflow-hidden">
+                            <input id="ac-title" placeholder="Заголовок" required
+                                   class="input-imperial w-full rounded-xl p-3 text-sm"
+                                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+                            <textarea id="ac-text" placeholder="Текст летописи..." required
+                                      class="input-imperial w-full rounded-xl p-3 resize-none text-sm" rows="3"
+                                      style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
+                            <div class="relative w-full rounded-xl p-3 flex items-center justify-center overflow-hidden transition-colors"
+                                 style="background: rgba(13,11,24,0.8); border: 1px dashed rgba(201,162,39,0.25);">
                                 <input type="file" id="ac-img-file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
                                 <div class="flex items-center gap-2 pointer-events-none">
-                                    <span class="material-symbols-outlined text-outline text-xl" data-icon="add_photo_alternate">add_photo_alternate</span>
-                                    <span class="text-sm font-label text-on-surface-variant" id="ac-file-label">Выберите обложку</span>
+                                    <span class="material-symbols-outlined text-gold/40 text-xl" data-icon="add_photo_alternate">add_photo_alternate</span>
+                                    <span class="text-sm font-body text-parchment-dim/50" id="ac-file-label">Выберите обложку</span>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full py-3 bg-gradient-to-r from-primary-container to-primary text-on-primary font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all text-sm">
+                            <button type="submit"
+                                    class="w-full py-3 font-headline font-bold rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm tracking-wide"
+                                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18; box-shadow: 0 4px 16px rgba(201,162,39,0.25);">
                                 <span class="material-symbols-outlined text-base" data-icon="publish">publish</span>
                                 Опубликовать
                             </button>
                         </form>
                     </section>
 
-                    <section class="bg-surface-container-low p-5 rounded-2xl shadow-xl border border-outline-variant/10">
+                    <!-- Форма: Создать квиз -->
+                    <section class="p-5 rounded-2xl shadow-xl"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-tertiary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-tertiary text-lg" data-icon="quiz">quiz</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(26,92,158,0.2); border: 1px solid rgba(74,143,212,0.3);">
+                                <span class="material-symbols-outlined text-lapis-light text-lg" data-icon="quiz">quiz</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Создать испытание</h2>
-                                <p class="text-xs text-on-surface-variant">Новый квиз для участников</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Создать испытание</h2>
+                                <p class="text-xs text-parchment-dim/60">Новый квиз для участников</p>
                             </div>
                         </div>
                         <form id="form-add-quiz" class="space-y-3">
-                            <input id="aq-title" placeholder="Название квиза" required class="w-full bg-surface-container-lowest border-none rounded-xl p-3 outline-none focus:ring-2 focus:ring-secondary text-sm"/>
-                            <textarea id="aq-options-json" placeholder='[{"q":"Вопрос?","options":["A","B","C","D"],"correct":0}]' required class="w-full bg-surface-container-lowest border-none rounded-xl p-3 outline-none resize-none font-mono text-xs focus:ring-2 focus:ring-secondary" rows="4"></textarea>
-                            <div class="flex items-center gap-3 bg-surface-container-lowest rounded-xl p-3">
-                                <span class="material-symbols-outlined text-outline text-lg" data-icon="timer">timer</span>
+                            <input id="aq-title" placeholder="Название квиза" required
+                                   class="input-imperial w-full rounded-xl p-3 text-sm"
+                                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+                            <textarea id="aq-options-json"
+                                      placeholder='[{"q":"Вопрос?","options":["A","B","C","D"],"correct":0}]' required
+                                      class="input-imperial w-full rounded-xl p-3 resize-none font-mono text-xs" rows="4"
+                                      style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
+                            <div class="flex items-center gap-3 rounded-xl p-3"
+                                 style="background: rgba(13,11,24,0.8); border: 1px solid rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold/50 text-lg" data-icon="timer">timer</span>
                                 <div class="flex-1">
-                                    <label class="block text-xs text-on-surface-variant mb-0.5">Длительность (часов)</label>
-                                    <input type="number" id="aq-duration-hours" min="1" value="24" class="w-full bg-transparent outline-none text-on-surface text-sm font-bold"/>
+                                    <label class="block text-xs text-parchment-dim/60 mb-0.5">Длительность (часов)</label>
+                                    <input type="number" id="aq-duration-hours" min="1" value="24"
+                                           class="w-full bg-transparent outline-none text-parchment text-sm font-bold"/>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full py-3 bg-gradient-to-r from-tertiary-container to-tertiary text-on-tertiary font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all text-sm">
+                            <button type="submit"
+                                    class="w-full py-3 font-headline font-bold rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm tracking-wide"
+                                    style="background: linear-gradient(135deg, #1a5c9e, #0f3a6b); color: #e8ddc4; border: 1px solid rgba(74,143,212,0.3); box-shadow: 0 4px 16px rgba(26,92,158,0.25);">
                                 <span class="material-symbols-outlined text-base" data-icon="rocket_launch">rocket_launch</span>
                                 Запустить квиз
                             </button>
                         </form>
                     </section>
 
-                    <section class="bg-surface-container-low p-5 rounded-2xl shadow-xl border border-outline-variant/10">
+                    <!-- Управление записями -->
+                    <section class="p-5 rounded-2xl shadow-xl"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-error-container/50 flex items-center justify-center shrink-0">
-                                    <span class="material-symbols-outlined text-error text-lg" data-icon="delete_sweep">delete_sweep</span>
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                     style="background: rgba(139,26,42,0.2); border: 1px solid rgba(196,74,90,0.3);">
+                                    <span class="material-symbols-outlined text-ruby-light text-lg" data-icon="delete_sweep">delete_sweep</span>
                                 </div>
                                 <div>
-                                    <h2 class="font-headline text-base text-on-surface">Записи летописи</h2>
-                                    <p class="text-xs text-on-surface-variant">Управление публикациями</p>
+                                    <h2 class="font-headline text-sm text-parchment tracking-wide">Записи летописи</h2>
+                                    <p class="text-xs text-parchment-dim/60">Управление публикациями</p>
                                 </div>
                             </div>
-                            <button onclick="app.loadAdminPostsList()" class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-variant transition-colors">
-                                <span class="material-symbols-outlined text-on-surface-variant text-lg" data-icon="refresh">refresh</span>
+                            <button onclick="app.loadAdminPostsList()"
+                                    class="w-8 h-8 flex items-center justify-center rounded-full transition-colors"
+                                    style="background: rgba(201,162,39,0.1); border: 1px solid rgba(201,162,39,0.2);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="refresh">refresh</span>
                             </button>
                         </div>
                         <div id="admin-posts-list" class="space-y-3">
-                            <p class="text-center text-on-surface-variant text-sm py-4">Нажмите «↻» для загрузки</p>
+                            <p class="text-center text-parchment-dim/50 text-sm py-4">Нажмите «↻» для загрузки</p>
                         </div>
                     </section>
                 </div>
 
-                <!-- SUB-TAB 2: ANALYTICS -->
+                <!-- ── ПОД-ВКЛАДКА 2: АНАЛИТИКА ── -->
                 <div id="admin-panel-analytics" class="admin-sub-panel px-4 space-y-5 hidden">
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/10 text-center">
-                            <div class="w-9 h-9 rounded-xl bg-primary-container mx-auto mb-2 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-on-primary-container text-lg" data-icon="group">group</span>
+                        <div class="rounded-2xl p-4 text-center"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                            <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
+                                 style="background: rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="group">group</span>
                             </div>
-                            <div id="stat-total-users" class="text-2xl font-bold text-primary mb-0.5">—</div>
-                            <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Участников</p>
+                            <div id="stat-total-users" class="text-2xl font-bold text-gold mb-0.5" style="font-family:'Cinzel',serif;">—</div>
+                            <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Участников</p>
                         </div>
-                        <div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/10 text-center">
-                            <div class="w-9 h-9 rounded-xl bg-secondary-container mx-auto mb-2 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-on-secondary-container text-lg" data-icon="photo_library">photo_library</span>
+                        <div class="rounded-2xl p-4 text-center"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                            <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
+                                 style="background: rgba(26,92,158,0.2);">
+                                <span class="material-symbols-outlined text-lapis-light text-lg" data-icon="photo_library">photo_library</span>
                             </div>
-                            <div id="stat-total-photos" class="text-2xl font-bold text-secondary mb-0.5">—</div>
-                            <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Фото в галерее</p>
+                            <div id="stat-total-photos" class="text-2xl font-bold text-lapis-light mb-0.5" style="font-family:'Cinzel',serif;">—</div>
+                            <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Фото в галерее</p>
                         </div>
-                        <div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/10 text-center">
-                            <div class="w-9 h-9 rounded-xl bg-tertiary-container mx-auto mb-2 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-on-tertiary text-lg" data-icon="quiz">quiz</span>
+                        <div class="rounded-2xl p-4 text-center"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                            <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
+                                 style="background: rgba(26,92,158,0.15);">
+                                <span class="material-symbols-outlined text-lapis-pale text-lg" data-icon="quiz">quiz</span>
                             </div>
-                            <div id="stat-total-quizzes" class="text-2xl font-bold text-tertiary mb-0.5">—</div>
-                            <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Квизов</p>
+                            <div id="stat-total-quizzes" class="text-2xl font-bold text-lapis-pale mb-0.5" style="font-family:'Cinzel',serif;">—</div>
+                            <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Квизов</p>
                         </div>
-                        <div class="bg-surface-container-low rounded-2xl p-4 border border-outline-variant/10 text-center">
-                            <div class="w-9 h-9 rounded-xl bg-surface-container-high mx-auto mb-2 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-on-surface-variant text-lg" data-icon="leaderboard">leaderboard</span>
+                        <div class="rounded-2xl p-4 text-center"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                            <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
+                                 style="background: rgba(201,162,39,0.1);">
+                                <span class="material-symbols-outlined text-gold-light text-lg" data-icon="leaderboard">leaderboard</span>
                             </div>
-                            <div id="stat-total-results" class="text-2xl font-bold text-on-surface mb-0.5">—</div>
-                            <p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Прохождений</p>
+                            <div id="stat-total-results" class="text-2xl font-bold text-gold-light mb-0.5" style="font-family:'Cinzel',serif;">—</div>
+                            <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Прохождений</p>
                         </div>
                     </div>
 
-                    <section class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+                    <!-- График активности -->
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-primary-container text-lg" data-icon="bar_chart">bar_chart</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="bar_chart">bar_chart</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Активность участников</h2>
-                                <p class="text-xs text-on-surface-variant">Регистрации за последние 14 дней</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Активность участников</h2>
+                                <p class="text-xs text-parchment-dim/60">Регистрации за последние 14 дней</p>
                             </div>
                         </div>
                         <div class="relative h-48">
@@ -380,66 +551,77 @@
                         </div>
                     </section>
 
-                    <section class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+                    <!-- Общий рейтинг -->
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-tertiary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-tertiary text-lg" data-icon="emoji_events">emoji_events</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="emoji_events">emoji_events</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Общий рейтинг</h2>
-                                <p class="text-xs text-on-surface-variant">За все квизы</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Общий рейтинг</h2>
+                                <p class="text-xs text-parchment-dim/60">За все квизы</p>
                             </div>
                         </div>
                         <div id="overall-leaderboard" class="space-y-2">
-                            <p class="text-center text-on-surface-variant text-sm py-4">Загрузка...</p>
+                            <p class="text-center text-parchment-dim/50 text-sm py-4">Загрузка...</p>
                         </div>
                     </section>
 
-                    <section class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+                    <!-- Победители по квизам -->
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-secondary-container text-lg" data-icon="workspace_premium">workspace_premium</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(26,92,158,0.2);">
+                                <span class="material-symbols-outlined text-lapis-light text-lg" data-icon="workspace_premium">workspace_premium</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Победители по квизам</h2>
-                                <p class="text-xs text-on-surface-variant">Топ-3 по каждому испытанию</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Победители по квизам</h2>
+                                <p class="text-xs text-parchment-dim/60">Топ-3 по каждому испытанию</p>
                             </div>
                         </div>
                         <div id="per-quiz-winners" class="space-y-4">
-                            <p class="text-center text-on-surface-variant text-sm py-4">Загрузка...</p>
+                            <p class="text-center text-parchment-dim/50 text-sm py-4">Загрузка...</p>
                         </div>
                     </section>
                 </div>
 
-                <!-- SUB-TAB 3: MODERATION -->
+                <!-- ── ПОД-ВКЛАДКА 3: МОДЕРАЦИЯ ── -->
                 <div id="admin-panel-moderation" class="admin-sub-panel px-4 space-y-5 hidden">
-                    <section class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+                    
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-error-container/60 flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-error text-lg" data-icon="pending_actions">pending_actions</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(139,26,42,0.2); border: 1px solid rgba(196,74,90,0.3);">
+                                <span class="material-symbols-outlined text-ruby-light text-lg" data-icon="pending_actions">pending_actions</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Ожидают проверки</h2>
-                                <p class="text-xs text-on-surface-variant" id="mod-count">загрузка...</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Ожидают проверки</h2>
+                                <p class="text-xs text-parchment-dim/60" id="mod-count">загрузка...</p>
                             </div>
                         </div>
                         <div id="mod-feed" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <p class="text-on-surface-variant text-sm">Загрузка...</p>
+                            <p class="text-parchment-dim/50 text-sm">Загрузка...</p>
                         </div>
                     </section>
 
-                    <section class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-9 h-9 rounded-xl bg-secondary-container flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined text-on-secondary-container text-lg" data-icon="check_circle">check_circle</span>
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="check_circle">check_circle</span>
                             </div>
                             <div>
-                                <h2 class="font-headline text-base text-on-surface">Одобренные фото</h2>
-                                <p class="text-xs text-on-surface-variant" id="approved-count">загрузка...</p>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Одобренные фото</h2>
+                                <p class="text-xs text-parchment-dim/60" id="approved-count">загрузка...</p>
                             </div>
                         </div>
                         <div id="approved-feed" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <p class="col-span-2 text-on-surface-variant text-sm">Загрузка...</p>
+                            <p class="col-span-2 text-parchment-dim/50 text-sm">Загрузка...</p>
                         </div>
                     </section>
                 </div>
@@ -447,84 +629,165 @@
             </div>
         </main>
 
-        <!-- Dynamic Bottom Nav -->
-        <nav id="bottom-bar" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-4 bg-[#2d3449]/90 dark:bg-[#2d3449]/90 backdrop-blur-xl rounded-t-2xl shadow-[0_-12px_32px_rgba(0,0,0,0.4)]">
-            <a id="tab-btn-chronicle" class="nav-tab active-tab flex flex-col items-center justify-center text-primary hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('chronicle')">
-                <span class="material-symbols-outlined nav-icon fill-icon mb-1" data-icon="history_edu">history_edu</span>
-                <span class="font-manrope text-[10px] uppercase tracking-wider">Летопись</span>
+        <!-- ══ НИЖНЯЯ НАВИГАЦИЯ ══ -->
+        <nav id="bottom-bar"
+             class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-5 pt-4"
+             style="background: linear-gradient(180deg, rgba(19,15,38,0.95) 0%, rgba(13,11,24,0.98) 100%);
+                    border-top: 1px solid rgba(201,162,39,0.15);
+                    box-shadow: 0 -8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.08);">
+            
+            <a id="tab-btn-chronicle"
+               class="nav-tab active-tab flex flex-col items-center justify-center transition-all group cursor-pointer"
+               onclick="app.switchTab('chronicle')" style="color: #c9a227;">
+                <span class="material-symbols-outlined nav-icon fill-icon mb-1 text-2xl" data-icon="history_edu">history_edu</span>
+                <span class="font-body text-[9px] uppercase tracking-wider font-medium">Летопись</span>
             </a>
-            <a id="tab-btn-quizzes" class="nav-tab flex flex-col items-center justify-center text-[#b5c4ff]/60 hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('quizzes')">
-                <span class="material-symbols-outlined nav-icon mb-1" data-icon="quiz">quiz</span>
-                <span class="font-manrope text-[10px] uppercase tracking-wider">Испытания</span>
+
+            <a id="tab-btn-quizzes"
+               class="nav-tab flex flex-col items-center justify-center transition-all group cursor-pointer"
+               onclick="app.switchTab('quizzes')" style="color: rgba(181,168,130,0.5);">
+                <span class="material-symbols-outlined nav-icon mb-1 text-2xl" data-icon="quiz">quiz</span>
+                <span class="font-body text-[9px] uppercase tracking-wider font-medium">Испытания</span>
             </a>
-            <a id="tab-btn-gallery" class="nav-tab flex flex-col items-center justify-center text-[#b5c4ff]/60 hover:text-secondary transition-colors group cursor-pointer" onclick="app.switchTab('gallery')">
-                <span class="material-symbols-outlined nav-icon mb-1" data-icon="auto_awesome_motion">auto_awesome_motion</span>
-                <span class="font-manrope text-[10px] uppercase tracking-wider">Галерея</span>
+
+            <a id="tab-btn-gallery"
+               class="nav-tab flex flex-col items-center justify-center transition-all group cursor-pointer"
+               onclick="app.switchTab('gallery')" style="color: rgba(181,168,130,0.5);">
+                <span class="material-symbols-outlined nav-icon mb-1 text-2xl" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+                <span class="font-body text-[9px] uppercase tracking-wider font-medium">Галерея</span>
             </a>
-            <a id="tab-btn-admin" class="nav-tab hidden flex flex-col items-center justify-center text-error hover:text-error-container transition-colors group cursor-pointer" onclick="app.switchTab('admin')">
-                <span class="material-symbols-outlined nav-icon mb-1" data-icon="admin_panel_settings">admin_panel_settings</span>
-                <span class="font-manrope text-[10px] uppercase tracking-wider">Админ</span>
+
+            <a id="tab-btn-admin"
+               class="nav-tab hidden flex flex-col items-center justify-center transition-all group cursor-pointer"
+               onclick="app.switchTab('admin')" style="color: rgba(196,74,90,0.7);">
+                <span class="material-symbols-outlined nav-icon mb-1 text-2xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+                <span class="font-body text-[9px] uppercase tracking-wider font-medium">Админ</span>
             </a>
         </nav>
     </div>
 
-    <!-- Hidden canvas for Story Generation -->
+    <!-- ══ СКРЫТЫЙ CANVAS ДЛЯ STORY ══ -->
     <canvas id="story-canvas" width="1080" height="1920"></canvas>
 
-    <!-- Quiz Modal (Overlay) -->
-    <div id="quiz-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-center items-center px-4">
-        <div class="bg-surface-container w-full max-w-md rounded-2xl p-6 shadow-2xl border border-secondary/20 relative">
-            <button onclick="app.closeQuiz()" class="absolute top-4 right-4 text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">close</span></button>
-            <h2 id="qm-title" class="font-headline text-2xl text-primary mb-4">Название Квиза</h2>
+    <!-- ══ МОДАЛЬНОЕ ОКНО: КВИЗ ══ -->
+    <div id="quiz-modal" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm hidden flex flex-col justify-center items-center px-4">
+        <div class="w-full max-w-md rounded-2xl p-6 shadow-2xl relative"
+             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.25); box-shadow: 0 24px 64px rgba(0,0,0,0.7);">
+            <!-- Угловые орнаменты -->
+            <div class="absolute top-3 left-3 w-4 h-4 pointer-events-none opacity-40"
+                 style="border-top: 1px solid #c9a227; border-left: 1px solid #c9a227;"></div>
+            <div class="absolute top-3 right-12 w-4 h-4 pointer-events-none opacity-40"
+                 style="border-top: 1px solid #c9a227; border-right: 1px solid #c9a227;"></div>
+            
+            <button onclick="app.closeQuiz()" class="absolute top-4 right-4 text-parchment-dim/50 hover:text-parchment transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h2 id="qm-title" class="font-headline text-xl text-gold-light mb-4 pr-8 tracking-wide">Название Квиза</h2>
+            <div class="gold-divider mb-4"></div>
             <div id="qm-content" class="space-y-4">
-                <!-- Current Question / Score UI -->
+                <!-- Вопрос / Результат -->
             </div>
             <div id="qm-actions" class="mt-6 flex justify-end"></div>
         </div>
     </div>
     
-    <!-- Upload Description Modal (Overlay) -->
-    <div id="upload-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex flex-col justify-end">
-        <div class="bg-surface-container w-full rounded-t-3xl p-6 shadow-2xl relative animate-slide-up">
-            <button onclick="document.getElementById('upload-modal').classList.add('hidden')" class="absolute top-4 right-4 text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
-            <h2 class="font-headline text-xl text-primary mb-2">Новое фото</h2>
-            <p class="text-sm text-on-surface-variant mb-4 font-label">Подпись (не более 30 символов)</p>
-            <input type="text" id="upload-desc" maxlength="30" class="w-full bg-surface-container-lowest text-on-surface rounded-xl p-4 border border-outline-variant focus:border-secondary transition-colors mb-4"/>
-            <button class="w-full py-4 rounded-xl bg-secondary text-on-secondary font-bold text-lg active:scale-95" onclick="app.submitReel()">Отправить на модерацию</button>
+    <!-- ══ МОДАЛЬНОЕ ОКНО: ЗАГРУЗКА ФОТО ══ -->
+    <div id="upload-modal" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm hidden flex flex-col justify-end">
+        <div class="w-full rounded-t-3xl p-6 shadow-2xl relative animate-slide-up"
+             style="background: linear-gradient(160deg, #1c1530, #130f26); border-top: 1px solid rgba(201,162,39,0.2);">
+            <button onclick="document.getElementById('upload-modal').classList.add('hidden')"
+                    class="absolute top-4 right-4 text-parchment-dim/50 hover:text-parchment transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h2 class="font-headline text-lg text-gold-light mb-1 tracking-wide">Новое фото</h2>
+            <p class="text-sm text-parchment-dim/60 mb-4 font-body">Подпись (не более 30 символов)</p>
+            <input type="text" id="upload-desc" maxlength="30"
+                   class="input-imperial w-full rounded-xl p-4 mb-4"
+                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+            <button class="w-full py-4 rounded-xl font-headline font-bold text-sm tracking-wide active:scale-95 transition-all"
+                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18; box-shadow: 0 8px 24px rgba(201,162,39,0.3);"
+                    onclick="app.submitReel()">
+                Отправить на модерацию
+            </button>
         </div>
     </div>
 
-    <!-- Bookmarks Modal -->
-    <div id="bookmarks-modal" class="fixed inset-0 z-[100] bg-background hidden flex-col transition-transform duration-300 translate-x-full">
-        <div class="pt-16 px-6 pb-4 flex items-center justify-start border-b border-outline/10 bg-surface-dim gap-4">
-            <button onclick="app.closeBookmarks()" class="text-on-surface flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
-                <span class="material-symbols-outlined">arrow_back</span>
-                <span class="font-label text-sm font-medium">Назад</span>
+    <!-- ══ МОДАЛЬНОЕ ОКНО: ЗАКЛАДКИ ══ -->
+    <div id="bookmarks-modal" class="fixed inset-0 z-[100] hidden flex-col transition-transform duration-300 translate-x-full"
+         style="background: #0d0b18;">
+        <div class="pt-16 px-5 pb-4 flex items-center justify-start gap-4"
+             style="background: linear-gradient(180deg, #130f26, #0d0b18); border-bottom: 1px solid rgba(201,162,39,0.15);">
+            <button onclick="app.closeBookmarks()"
+                    class="text-parchment flex items-center gap-2 p-2 -ml-2 rounded-full transition-colors hover:bg-white/5">
+                <span class="material-symbols-outlined text-gold">arrow_back</span>
+                <span class="font-body text-sm font-medium text-parchment-dim">Назад</span>
             </button>
-            <h2 class="font-headline text-xl text-on-surface ml-2">Закладки</h2>
+            <h2 class="font-headline text-lg text-gold-light ml-2 tracking-wide">Закладки</h2>
         </div>
         <div class="flex-1 overflow-y-auto p-4 grid grid-cols-2 gap-4" id="bookmarks-grid">
-            <!-- Items via JS -->
+            <!-- Элементы через JS -->
         </div>
     </div>
 
-    <!-- Photo Viewer Modal -->
+    <!-- ══ МОДАЛЬНОЕ ОКНО: ПРОСМОТР ФОТО ══ -->
     <div id="photo-viewer-modal" class="fixed inset-0 z-[110] bg-black hidden flex-col transition-opacity duration-300 opacity-0">
-        <div class="absolute top-0 w-full flex justify-end p-6 pt-16 bg-gradient-to-b from-black/60 to-transparent z-10">
-            <button onclick="app.closePhotoViewer()" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white active:scale-95 transition-transform">
+        <div class="absolute top-0 w-full flex justify-end p-6 pt-16 z-10"
+             style="background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);">
+            <button onclick="app.closePhotoViewer()"
+                    class="w-10 h-10 backdrop-blur-md rounded-full flex items-center justify-center text-white active:scale-95 transition-transform"
+                    style="background: rgba(255,255,255,0.1);">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
         <img id="viewer-img" src="" class="w-full h-[100dvh] object-contain animate-fade-in" />
     </div>
 
-    <!-- Initial Loading Screen -->
-    <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center bg-background transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-headline text-primary italic">Загрузка данных...</p>
+    <!-- ══ ЭКРАН ЗАГРУЗКИ ══ -->
+    <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center transition-opacity duration-500"
+         style="background: radial-gradient(ellipse at center, #1a1338 0%, #0d0b18 70%);">
+        
+        <!-- Орнаментная анимация загрузки -->
+        <div class="relative flex items-center justify-center mb-6">
+            <div class="absolute w-20 h-20 rounded-full loading-ring"
+                 style="border: 2px solid transparent; border-top-color: #c9a227; border-right-color: rgba(201,162,39,0.3);"></div>
+            <div class="absolute w-14 h-14 rounded-full"
+                 style="border: 1px solid rgba(201,162,39,0.2);"></div>
+            <span class="material-symbols-outlined text-gold text-2xl" data-icon="history_edu">history_edu</span>
+        </div>
+        <p class="font-headline text-gold-light text-sm tracking-widest uppercase">Загрузка данных...</p>
+        <p class="font-serif italic text-parchment-dim/40 text-xs mt-2">Наследие Амира Темура</p>
     </div>
 
-    <script src="script.js?v=3.1"></script>
-    <script src="app.js?v=3.1"></script>
+    <script src="script.js?v=3.2"></script>
+    <script src="app.js?v=3.2"></script>
+    <!-- Тёмный фон input: JS-хак против user-agent stylesheet Chromium -->
+    <script>
+    (function forceDarkInputs() {
+        const DARK_BG = 'rgba(13,11,24,0.95)';
+        const STYLE   = `background-color:${DARK_BG}!important;` +
+                        `color:#e8ddc4!important;` +
+                        `border:1px solid rgba(201,162,39,0.25)!important;` +
+                        `border-radius:0.75rem!important;` +
+                        `caret-color:#c9a227!important;`;
+        function applyToAll() {
+            document.querySelectorAll('input:not([type=file]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=button]):not([type=reset]), textarea')
+                .forEach(el => {
+                    el.style.setProperty('background-color', DARK_BG, 'important');
+                    el.style.setProperty('color',            '#e8ddc4', 'important');
+                    el.style.setProperty('border', '1px solid rgba(201,162,39,0.25)', 'important');
+                    el.style.setProperty('border-radius', '0.75rem', 'important');
+                    el.style.setProperty('caret-color', '#c9a227', 'important');
+                });
+        }
+        // При первой загрузке
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyToAll);
+        } else {
+            applyToAll();
+        }
+        // Наблюдатель: при появлении динамических элементов
+        new MutationObserver(applyToAll).observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
 </body>
 </html>

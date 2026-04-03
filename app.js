@@ -21,10 +21,10 @@ const app = {
         if(tg.expand) tg.expand();
         if(tg.ready) tg.ready();
         
-        // PWA Header colors setup
+        // PWA Header colors setup (тимуридский тёмный)
         if(window.Telegram && window.Telegram.WebApp) {
-            if(window.Telegram.WebApp.setHeaderColor) window.Telegram.WebApp.setHeaderColor('#0b1326');
-            if(window.Telegram.WebApp.setBackgroundColor) window.Telegram.WebApp.setBackgroundColor('#0b1326');
+            if(window.Telegram.WebApp.setHeaderColor) window.Telegram.WebApp.setHeaderColor('#0d0b18');
+            if(window.Telegram.WebApp.setBackgroundColor) window.Telegram.WebApp.setBackgroundColor('#0d0b18');
         }
         
         document.getElementById('onboarding-form').addEventListener('submit', this.handleOnboarding.bind(this));
@@ -146,11 +146,12 @@ const app = {
             // Update Avatar Name
             const headerAvatar = document.getElementById('header-avatar');
             if(headerAvatar) {
-                let nameStr = 'И'; // default
+                let nameStr = 'А'; // default
                 if(this.user.full_name && this.user.full_name.text) {
                     nameStr = this.user.full_name.text.charAt(0).toUpperCase();
                 }
-                headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameStr)}&background=003399&color=e9c400`;
+                // Тимуридский аватар: тёмно-фиолетовый фон + золото
+                headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameStr)}&background=1a1338&color=c9a227&bold=true`;
             }
             
             // Show Admin Tab if applicable
@@ -164,17 +165,18 @@ const app = {
 
     // --- Routing ---
     switchTab(tabName) {
+        // Сброс всех вкладок (тимуридский стиль)
         document.querySelectorAll('.nav-tab').forEach(el => {
             el.querySelector('.nav-icon').classList.remove('fill-icon');
-            el.classList.remove('text-[#e9c400]', 'text-primary');
-            el.classList.add('text-[#b5c4ff]/60');
-            el.classList.remove('relative', 'after:content-[\'\']', 'after:w-1', 'after:h-1', 'after:bg-[#43e2d2]', 'after:rounded-full', 'after:mt-1', 'scale-110');
+            el.classList.remove('active-tab');
+            el.style.color = 'rgba(181,168,130,0.5)';
         });
 
         const activeEl = document.getElementById(`tab-btn-${tabName}`);
         if(activeEl) {
-            activeEl.classList.add('text-[#e9c400]', 'relative', 'after:content-[\'\']', 'after:w-1', 'after:h-1', 'after:bg-[#43e2d2]', 'after:rounded-full', 'after:mt-1', 'scale-110');
-            activeEl.classList.remove('text-[#b5c4ff]/60');
+            activeEl.classList.add('active-tab');
+            // Цвет Админ вкладки — рубин, остальных — золото
+            activeEl.style.color = tabName === 'admin' ? '#c44a5a' : '#c9a227';
             activeEl.querySelector('.nav-icon').classList.add('fill-icon');
         }
 
@@ -204,10 +206,10 @@ const app = {
     // --- Chronicle Content ---
     async loadChronicle() {
         const feed = document.getElementById('chronicle-feed');
-        feed.innerHTML = '<p class="text-center text-on-surface-variant">Загрузка летописи...</p>';
+        feed.innerHTML = '<p class="text-center" style="color:rgba(181,168,130,0.5);">Загрузка летописи...</p>';
         const { data, error } = await supabaseClient.from('posts').select('*, users(full_name)').order('created_at', { ascending: false });
         if(error || !data) {
-            feed.innerHTML = '<p class="text-center text-error">Ошибка загрузки</p>';
+            feed.innerHTML = '<p class="text-center" style="color:#c44a5a;">Ошибка загрузки</p>';
             return;
         }
 
@@ -228,20 +230,22 @@ const app = {
             const sqImg = post.image_url || 'https://images.unsplash.com/photo-1590494056294-84d72023d6a2?auto=format&fit=crop&q=80&w=600';
 
             const article = document.createElement('article');
-            article.className = "bg-surface-container-low rounded-xl overflow-hidden shadow-2xl shadow-black/40 group";
+            article.className = "group rounded-2xl overflow-hidden";
+            article.style.cssText = "background:linear-gradient(145deg,#1e1635,#130f26);border:1px solid rgba(201,162,39,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);";
             article.innerHTML = `
-                <div class="relative h-64 overflow-hidden">
-                    <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="${sqImg}"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-transparent to-transparent"></div>
-                    <div class="absolute top-4 left-4 bg-tertiary/90 text-on-tertiary px-3 py-1 rounded-full text-xs font-bold font-manrope">Летопись</div>
+                <div class="relative h-56 overflow-hidden">
+                    <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${sqImg}"/>
+                    <div class="absolute inset-0" style="background:linear-gradient(to top, #130f26 0%, transparent 60%);"></div>
+                    <div class="absolute top-4 left-4 tag-chronicle">Летопись</div>
                 </div>
-                <div class="p-6">
-                    <h2 class="font-notoSerif text-2xl font-bold text-primary mb-3">${titleText}</h2>
-                    <p class="font-notoSerif text-on-surface/90 leading-relaxed italic mb-6 shadow-text line-clamp-4">${contentText}</p>
-                    <div class="flex items-center justify-between pt-4 border-t border-outline-variant/20">
-                        <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${sqTitle}', '${sqDesc}', '${sqImg}')">
+                <div class="p-5">
+                    <h2 class="font-headline text-xl font-bold mb-3 tracking-wide" style="color:#f5d67a;">${titleText}</h2>
+                    <div class="gold-divider mb-3"></div>
+                    <p class="font-serif leading-relaxed italic mb-5 line-clamp-4" style="color:rgba(232,221,196,0.8);font-size:0.9rem;">${contentText}</p>
+                    <div class="flex items-center justify-between pt-3" style="border-top:1px solid rgba(201,162,39,0.1);">
+                        <button class="btn-save-chronicle px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95" onclick="app.shareStory('${sqTitle}', '${sqDesc}', '${sqImg}')">
                             <span class="material-symbols-outlined text-lg" data-icon="download">download</span>
-                            <span class="text-xs font-manrope font-bold">Сохранить</span>
+                            <span class="font-body text-xs font-bold">Сохранить</span>
                         </button>
                     </div>
                 </div>
@@ -426,29 +430,31 @@ const app = {
             if (hasResult || !isActive) {
                 const p = resultDict[quiz.id]?.score || 0;
                 html = `
-                <div class="bg-surface-container-lowest/50 rounded-xl p-6 border border-outline-variant/15 opacity-80">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-headline text-lg text-on-surface-variant">${quiz.title}</h4>
-                        <span class="bg-surface-container-highest text-on-surface-variant text-[10px] font-bold px-2 py-1 rounded uppercase">Завершено</span>
+                <div class="rounded-2xl p-5" style="background:rgba(30,22,53,0.5);border:1px solid rgba(201,162,39,0.1);opacity:0.75;">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-headline text-base" style="color:rgba(232,221,196,0.6);">${quiz.title}</h4>
+                        <span class="font-body text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider" style="background:rgba(201,162,39,0.1);color:rgba(201,162,39,0.5);">Завершено</span>
                     </div>
-                    <div class="bg-surface-container-low rounded-lg p-4 mb-4 flex items-center justify-around">
+                    <div class="gold-divider my-3"></div>
+                    <div class="rounded-xl p-3 flex items-center justify-around" style="background:rgba(13,11,24,0.5);">
                         <div class="flex flex-col items-center">
-                            <span class="text-xs text-on-surface-variant uppercase mb-1">Очки</span>
-                            <span class="text-lg font-bold text-secondary">${p} pts</span>
+                            <span class="font-body text-xs uppercase mb-1 tracking-wider" style="color:rgba(181,168,130,0.5);">Очки</span>
+                            <span class="font-headline text-xl font-bold" style="color:#c9a227;">${p}</span>
                         </div>
                     </div>
                 </div>`;
             } else {
                 html = `
-                <div class="group bg-surface-container-low rounded-xl p-6 border-l-4 border-secondary shadow-lg relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-4">
+                <div class="group rounded-2xl p-5 relative overflow-hidden">
+                    <div class="absolute left-0 top-4 bottom-4 w-0.5" style="background:linear-gradient(180deg,#c9a227,transparent);"></div>
+                    <div class="flex justify-between items-start mb-3 pl-3">
                         <div>
-                            <div class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Событие</div>
-                            <h4 class="font-headline text-xl text-primary-fixed-dim">${quiz.title}</h4>
+                            <div class="font-body text-[10px] font-bold uppercase tracking-widest mb-1" style="color:rgba(201,162,39,0.6);">Испытание</div>
+                            <h4 class="font-headline text-lg" style="color:#f5d67a;">${quiz.title}</h4>
                         </div>
-                        <span class="material-symbols-outlined text-tertiary" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
+                        <span class="material-symbols-outlined" data-icon="stars" style="color:#c9a227;font-variation-settings:'FILL' 1;">stars</span>
                     </div>
-                    <button class="w-full bg-primary-container text-on-primary py-3 rounded-xl font-bold inner-glow flex items-center justify-center gap-2 mt-4 active:scale-95 transition-all" onclick="app.openQuiz('${quiz.id}', ${hasResult})">
+                    <button class="w-full py-3 rounded-xl font-headline font-bold flex items-center justify-center gap-2 mt-3 active:scale-95 transition-all text-sm tracking-wide inner-glow" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#0d0b18;box-shadow:0 4px 16px rgba(201,162,39,0.25);" onclick="app.openQuiz('${quiz.id}', ${hasResult})">
                         <span>Начать испытание</span>
                         <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
                     </button>
@@ -490,19 +496,19 @@ const app = {
         const container = document.getElementById('qm-content');
         
         if(!qData) {
-            container.innerHTML = `<h3 class="text-xl text-center text-secondary mb-4">Завершено!</h3><p class="text-center">Вы ответили верно на ${c.score} из ${c.questions.length}. Очки будут начислены!</p>`;
-            document.getElementById('qm-actions').innerHTML = `<button onclick="app.submitQuizScore()" class="bg-primary-container text-on-primary px-6 py-2 rounded-xl">Завершить</button>`;
+            container.innerHTML = `<h3 class="font-headline text-xl text-center mb-3" style="color:#f5d67a;">✦ Завершено! ✦</h3><div class="gold-divider my-3"></div><p class="text-center font-serif italic" style="color:rgba(232,221,196,0.8);">Верных ответов: ${c.score} из ${c.questions.length}. Очки будут начислены в казну знаний!</p>`;
+            document.getElementById('qm-actions').innerHTML = `<button onclick="app.submitQuizScore()" class="font-headline font-bold px-6 py-3 rounded-xl text-sm tracking-wide" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#0d0b18;">Завершить</button>`;
             return;
         }
 
         let optsHtml = '';
         qData.options.forEach((opt, idx) => {
-            optsHtml += `<button onclick="app.answerQuiz(${idx}, ${qData.correct})" class="w-full text-left bg-surface-container-lowest hover:bg-surface-variant p-4 rounded-xl mb-2 transition-colors border border-outline-variant/30">${opt}</button>`;
+            optsHtml += `<button onclick="app.answerQuiz(${idx}, ${qData.correct})" class="w-full text-left p-4 rounded-xl mb-2 transition-all active:scale-98 font-body text-sm" style="background:rgba(13,11,24,0.8);border:1px solid rgba(201,162,39,0.15);color:#e8ddc4;">${opt}</button>`;
         });
 
         container.innerHTML = `
-            <p class="text-[10px] text-tertiary mb-2 uppercase tracking-widest">Вопрос ${c.index + 1} из ${c.questions.length}</p>
-            <h4 class="text-lg font-headline leading-tight mb-6">${qData.q}</h4>
+            <p class="font-body text-[10px] uppercase tracking-widest mb-2" style="color:rgba(201,162,39,0.6);">Вопрос ${c.index + 1} из ${c.questions.length}</p>
+            <h4 class="font-headline text-lg leading-tight mb-4" style="color:#f5d67a;">${qData.q}</h4>
             <div class="space-y-2">${optsHtml}</div>
         `;
         document.getElementById('qm-actions').innerHTML = '';
@@ -757,23 +763,25 @@ const app = {
 
     // --- Admin Sub-Tab Navigation ---
     switchAdminTab(tabName) {
-        // Hide all sub-panels
+        // Скрыть все панели
         document.querySelectorAll('.admin-sub-panel').forEach(el => el.classList.add('hidden'));
-        // Reset all sub-tab buttons
+        // Сбросить все кнопки
         document.querySelectorAll('.admin-sub-tab').forEach(btn => {
-            btn.classList.remove('bg-primary-container', 'text-on-primary', 'bg-tertiary-container', 'text-on-tertiary');
-            btn.classList.add('bg-surface-container', 'text-on-surface-variant');
+            btn.style.background = 'rgba(42,36,70,0.8)';
+            btn.style.color = 'rgba(232,221,196,0.5)';
+            btn.style.border = '1px solid rgba(201,162,39,0.1)';
         });
-        // Show selected panel
+        // Показать выбранную панель
         const panel = document.getElementById(`admin-panel-${tabName}`);
         if (panel) panel.classList.remove('hidden');
-        // Activate selected button
+        // Активировать кнопку
         const btn = document.getElementById(`admin-sub-btn-${tabName}`);
         if (btn) {
-            btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
-            btn.classList.add('bg-primary-container', 'text-on-primary');
+            btn.style.background = 'linear-gradient(135deg, #c9a227, #8a6b18)';
+            btn.style.color = '#0d0b18';
+            btn.style.border = 'none';
         }
-        // Load data for the tab
+        // Загрузить данные
         if (tabName === 'analytics') this.loadAnalytics();
         if (tabName === 'moderation') this.loadModerationFeed();
     },
@@ -870,17 +878,18 @@ const app = {
 
             const createdAt = post.created_at ? new Date(post.created_at).toLocaleDateString('ru-RU') : '';
             const item = document.createElement('div');
-            item.className = 'flex items-center gap-3 bg-surface-container-lowest rounded-xl p-3 border border-outline-variant/10';
+            item.className = 'flex items-center gap-3 rounded-xl p-3';
+            item.style.cssText = 'background:rgba(13,11,24,0.7);border:1px solid rgba(201,162,39,0.12);';
             item.innerHTML = `
-                <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-surface-container">
-                    <img src="${post.image_url || ''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\"material-symbols-outlined text-outline m-auto block text-center leading-[3rem]\\">image</span>'" />
+                <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0" style="background:#1c1530;">
+                    <img src="${post.image_url || ''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\"material-symbols-outlined\\" style=\\"color:rgba(201,162,39,0.3);display:block;text-align:center;line-height:3rem;\\">image</span>'" />
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-on-surface truncate">${titleText}</p>
-                    <p class="text-xs text-on-surface-variant">${createdAt}</p>
+                    <p class="text-sm font-medium truncate" style="color:#e8ddc4;">${titleText}</p>
+                    <p class="text-xs" style="color:rgba(181,168,130,0.5);">${createdAt}</p>
                 </div>
-                <button onclick="app.deletePost('${post.id}', this)" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-error/20 text-error transition-colors active:scale-90">
-                    <span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+                <button onclick="app.deletePost('${post.id}', this)" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors active:scale-90" style="background:rgba(139,26,42,0.15);">
+                    <span class="material-symbols-outlined text-lg" style="color:#c44a5a;" data-icon="delete">delete</span>
                 </button>
             `;
             dom.appendChild(item);
@@ -956,8 +965,8 @@ const app = {
                 datasets: [{
                     label: 'Регистрации',
                     data: values,
-                    backgroundColor: 'rgba(67, 226, 210, 0.3)',
-                    borderColor: '#43e2d2',
+                    backgroundColor: 'rgba(201, 162, 39, 0.2)',
+                    borderColor: '#c9a227',
                     borderWidth: 2,
                     borderRadius: 6,
                     borderSkipped: false
@@ -969,16 +978,16 @@ const app = {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#171f33',
-                        titleColor: '#43e2d2',
-                        bodyColor: '#dae2fd',
-                        borderColor: '#444653',
+                        backgroundColor: '#1e1635',
+                        titleColor: '#c9a227',
+                        bodyColor: '#e8ddc4',
+                        borderColor: 'rgba(201,162,39,0.3)',
                         borderWidth: 1
                     }
                 },
                 scales: {
-                    x: { ticks: { color: '#8e909e', font: { size: 10 } }, grid: { display: false } },
-                    y: { ticks: { color: '#8e909e', stepSize: 1 }, grid: { color: 'rgba(68,70,83,0.3)' }, beginAtZero: true }
+                    x: { ticks: { color: 'rgba(181,168,130,0.5)', font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { color: 'rgba(181,168,130,0.5)', stepSize: 1 }, grid: { color: 'rgba(201,162,39,0.06)' }, beginAtZero: true }
                 }
             }
         });
@@ -1016,13 +1025,13 @@ const app = {
             const medal = medals[idx] || `${idx + 1}.`;
             const isTop = idx < 3;
             return `
-            <div class="flex items-center gap-3 p-3 rounded-xl ${isTop ? 'bg-surface-container' : ''}">
+            <div class="flex items-center gap-3 p-3 rounded-xl" style="${isTop ? 'background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.1);' : ''}">
                 <span class="text-xl w-8 text-center shrink-0">${medal}</span>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-on-surface truncate">${name}</p>
-                    <p class="text-xs text-on-surface-variant">${cls ? `Класс ${cls}` : ''}</p>
+                    <p class="text-sm font-bold truncate" style="color:#e8ddc4;">${name}</p>
+                    <p class="text-xs" style="color:rgba(181,168,130,0.5);">${cls ? `Класс ${cls}` : ''}</p>
                 </div>
-                <span class="font-bold text-tertiary text-sm shrink-0">${score} очк.</span>
+                <span class="font-bold text-sm shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${score} очк.</span>
             </div>`;
         }).join('');
     },
@@ -1054,15 +1063,16 @@ const app = {
             if (quizResults.length === 0) return;
 
             const section = document.createElement('div');
-            section.className = 'bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/10';
+            section.className = 'rounded-xl p-4';
+            section.style.cssText = 'background:rgba(13,11,24,0.7);border:1px solid rgba(201,162,39,0.12);';
             section.innerHTML = `
-                <h3 class="font-headline text-sm text-secondary mb-3 pb-2 border-b border-outline-variant/20">${quiz.title}</h3>
+                <h3 class="font-headline text-sm mb-3 pb-2" style="color:#c9a227;border-bottom:1px solid rgba(201,162,39,0.2);">${quiz.title}</h3>
                 <div class="space-y-2">
                     ${quizResults.map((r, idx) => `
                     <div class="flex items-center gap-2">
                         <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.  '}</span>
-                        <span class="flex-1 text-sm text-on-surface truncate">${userMap[r.user_id] || 'Участник'}</span>
-                        <span class="font-bold text-tertiary text-xs shrink-0">${r.score} очк.</span>
+                        <span class="flex-1 text-sm truncate" style="color:#e8ddc4;">${userMap[r.user_id] || 'Участник'}</span>
+                        <span class="font-bold text-xs shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${r.score} очк.</span>
                     </div>`).join('')}
                 </div>
             `;
@@ -1099,21 +1109,21 @@ const app = {
             data.forEach(item => {
                 const userName = userMap[item.user_id] || 'Неизвестно';
                 dom.innerHTML += `
-                <div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/10">
+                <div class="rounded-xl overflow-hidden" style="background:rgba(13,11,24,0.8);border:1px solid rgba(201,162,39,0.12);">
                     <div class="h-40 relative cursor-pointer" onclick="app.openPhotoViewer('${item.photo_url}')">
                         <img src="${item.photo_url}" class="w-full h-full object-cover"/>
-                        <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded-lg text-[10px] text-white font-medium">@${userName}</div>
-                        <div class="absolute top-2 right-2 w-6 h-6 bg-black/40 flex items-center justify-center rounded-full">
+                        <div class="absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[10px] font-medium" style="background:rgba(0,0,0,0.7);color:#e8ddc4;">@${userName}</div>
+                        <div class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full" style="background:rgba(0,0,0,0.5);">
                             <span class="material-symbols-outlined text-white text-sm">fullscreen</span>
                         </div>
                     </div>
                     <div class="p-3">
-                        <p class="text-xs text-on-surface-variant mb-3 truncate">"${item.caption || 'Без подписи'}"</p>
+                        <p class="text-xs mb-3 truncate" style="color:rgba(181,168,130,0.6);">&laquo;${item.caption || 'Без подписи'}&raquo;</p>
                         <div class="flex gap-2">
-                            <button class="flex-1 py-2 bg-secondary/15 text-secondary border border-secondary/30 rounded-lg text-xs font-bold active:scale-95 transition-all" onclick="app.modAction('${item.id}', 'approve')">
+                            <button class="flex-1 py-2 rounded-lg text-xs font-bold active:scale-95 transition-all" style="background:rgba(201,162,39,0.1);color:#c9a227;border:1px solid rgba(201,162,39,0.25);" onclick="app.modAction('${item.id}', 'approve')">
                                 ✓ Одобрить
                             </button>
-                            <button class="flex-1 py-2 bg-error/10 text-error border border-error/20 rounded-lg text-xs font-bold active:scale-95 transition-all" onclick="app.modAction('${item.id}', 'delete')">
+                            <button class="flex-1 py-2 rounded-lg text-xs font-bold active:scale-95 transition-all" style="background:rgba(139,26,42,0.15);color:#c44a5a;border:1px solid rgba(196,74,90,0.2);" onclick="app.modAction('${item.id}', 'delete')">
                                 ✕ Удалить
                             </button>
                         </div>
