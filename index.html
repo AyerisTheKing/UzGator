@@ -2,7 +2,10 @@
 <html class="dark" lang="ru">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+    <meta name="theme-color" content="#0b1326">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Наследие Амира Темура</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -184,7 +187,7 @@
         </header>
 
         <!-- Main Workspace (Tab Content) -->
-        <main class="flex-1 w-full pt-28 pb-24 overflow-y-auto no-scrollbar scroll-smooth" id="main-content-area">
+        <main class="flex-1 min-h-0 w-full pt-28 pb-24 overflow-y-auto no-scrollbar scroll-smooth" id="main-content-area">
             
             <!-- TAB 1: Chronicle -->
             <div id="tab-chronicle" class="tab-content relative px-4 max-w-2xl mx-auto pt-4" style="display: none;">
@@ -336,9 +339,9 @@
     </div>
 
     <!-- Bookmarks Modal -->
-    <div id="bookmarks-modal" class="fixed inset-0 z-[100] bg-background hidden flex flex-col">
+    <div id="bookmarks-modal" class="fixed inset-0 z-[100] bg-background hidden flex-col transition-transform duration-300 translate-x-full">
         <div class="pt-12 px-6 pb-4 flex items-center justify-start border-b border-outline/10 bg-surface-dim gap-4">
-            <button onclick="document.getElementById('bookmarks-modal').classList.add('hidden')" class="text-on-surface flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
+            <button onclick="app.closeBookmarks()" class="text-on-surface flex items-center gap-2 p-2 -ml-2 rounded-full hover:bg-surface-variant transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
                 <span class="font-label text-sm font-medium">Назад</span>
             </button>
@@ -349,13 +352,23 @@
         </div>
     </div>
 
+    <!-- Photo Viewer Modal -->
+    <div id="photo-viewer-modal" class="fixed inset-0 z-[110] bg-black hidden flex-col transition-opacity duration-300 opacity-0">
+        <div class="absolute top-0 w-full flex justify-end p-6 pt-12 bg-gradient-to-b from-black/60 to-transparent z-10">
+            <button onclick="app.closePhotoViewer()" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <img id="viewer-img" src="" class="w-full h-[100dvh] object-contain animate-fade-in" />
+    </div>
+
     <!-- Initial Loading Screen -->
     <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center bg-background transition-opacity duration-500">
         <div class="w-16 h-16 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-4"></div>
         <p class="font-headline text-primary italic">Загрузка данных...</p>
     </div>
 
-    <script src="script.js?v=2.2"></script>
-    <script src="app.js?v=2.2"></script>
+    <script src="script.js?v=2.5"></script>
+    <script src="app.js?v=2.5"></script>
 </body>
 </html>

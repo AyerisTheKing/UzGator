@@ -21,6 +21,12 @@ const app = {
         if(tg.expand) tg.expand();
         if(tg.ready) tg.ready();
         
+        // PWA Header colors setup
+        if(window.Telegram && window.Telegram.WebApp) {
+            if(window.Telegram.WebApp.setHeaderColor) window.Telegram.WebApp.setHeaderColor('#0b1326');
+            if(window.Telegram.WebApp.setBackgroundColor) window.Telegram.WebApp.setBackgroundColor('#0b1326');
+        }
+        
         document.getElementById('onboarding-form').addEventListener('submit', this.handleOnboarding.bind(this));
         
         // Gallery Handlers
@@ -32,10 +38,7 @@ const app = {
              document.getElementById('upload-reel-file').click();
         });
         document.getElementById('upload-reel-file').addEventListener('change', this.handlePhotoSelection.bind(this));
-        document.getElementById('btn-bookmarks').addEventListener('click', () => {
-             document.getElementById('bookmarks-modal').classList.remove('hidden');
-             this.loadBookmarks();
-        });
+        document.getElementById('upload-reel-file').addEventListener('change', this.handlePhotoSelection.bind(this));
 
         // Admin Forms
         document.getElementById('form-add-chronicle').addEventListener('submit', this.adminAddChronicle.bind(this));
@@ -237,8 +240,8 @@ const app = {
                     <p class="font-notoSerif text-on-surface/90 leading-relaxed italic mb-6 shadow-text line-clamp-4">${contentText}</p>
                     <div class="flex items-center justify-between pt-4 border-t border-outline-variant/20">
                         <button class="bg-primary-container/30 hover:bg-primary-container/50 text-secondary px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95 border border-secondary/20 shadow-inner shadow-secondary/10" onclick="app.shareStory('${sqTitle}', '${sqDesc}', '${sqImg}')">
-                            <span class="material-symbols-outlined text-lg" data-icon="auto_awesome_motion">auto_awesome_motion</span>
-                            <span class="text-xs font-manrope font-bold">Поделиться в Сторис</span>
+                            <span class="material-symbols-outlined text-lg" data-icon="download">download</span>
+                            <span class="text-xs font-manrope font-bold">Сохранить</span>
                         </button>
                     </div>
                 </div>
@@ -343,25 +346,38 @@ const app = {
             ctx.fillStyle = "#43e2d2"; 
             ctx.fillText("@UzGatorBot", 540, 1700);
 
-            // Download
+            // Download — Mobile-safe approach
             const dataUrl = canvas.toDataURL("image/png");
-            
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.download = `story_${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
-            if(window.Telegram?.WebApp?.showPopup) {
-                window.Telegram.WebApp.showPopup({message: "Изображение сохранено!"});
+
+            // 1. Try Telegram native share (works in Telegram mobile)
+            if(window.Telegram?.WebApp?.shareToStory) {
+                window.Telegram.WebApp.shareToStory(dataUrl, {
+                    text: `Наследие Амира Темура | @UzGatorBot`
+                });
             } else {
-                alert("Изображение сохранено!");
+                // 2. Open blob in new tab — works on iOS Safari & Android Chrome natively
+                canvas.toBlob((blob) => {
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = `fact_${Date.now()}.png`;
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                    }, 1000);
+                }, 'image/png');
+
+                if(window.Telegram?.WebApp?.showPopup) {
+                    window.Telegram.WebApp.showPopup({message: "Нажмите «Сохранить» на открывшейся вкладке браузера!"});
+                }
             }
         };
 
         postImg.onerror = () => {
-            alert("Ошибка загрузки изображения. Скорее всего настройки CORS не разрешают скачивание.");
+            alert("Ошибка загрузки изображения.");
         };
     },
 
@@ -542,32 +558,45 @@ const app = {
         const userMap = {};
         if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text; });
 
+        const myId = this.user.tg_id;
+
         data.forEach(item => {
             const userName = userMap[item.user_id] || 'резидент';
+            // likes is now an array of user_ids stored in gallery.likes
+            const likesList = Array.isArray(item.likes) ? item.likes : [];
+            const isLiked = likesList.includes(myId);
+            const likeCount = likesList.length;
+
             const section = document.createElement('section');
-            section.className = "relative h-[100dvh] w-full flex flex-col justify-end snap-start shrink-0";
+            section.className = "relative h-[100dvh] w-full flex flex-col items-center justify-center snap-start shrink-0 bg-black";
             section.innerHTML = `
-                <img alt="Reel" class="absolute inset-0 w-full h-[100dvh] object-cover" src="${item.photo_url}"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                
-                <div class="relative w-full px-6 pb-32 flex justify-between items-end">
-                    <div class="max-w-[70%] mb-4">
-                        <div class="flex items-center gap-3 mb-2">
-                            <p class="font-label font-bold text-sm text-secondary">@${userName.replace(/\s+/g,'_').toLowerCase()}</p>
+                <!-- 9:16 Photo Container -->
+                <div class="relative w-full max-w-[calc(100dvh*9/16)] h-full overflow-hidden">
+                    <img alt="Reel" class="absolute inset-0 w-full h-full object-cover" src="${item.photo_url}"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="relative w-full px-6 pb-32 flex justify-between items-end">
+                        <div class="max-w-[70%] mb-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <p class="font-label font-bold text-sm text-secondary">@${userName.replace(/\s+/g,'_').toLowerCase()}</p>
+                            </div>
+                            <h2 class="font-headline italic text-xl text-white leading-tight drop-shadow-lg">${item.caption || ''}</h2>
                         </div>
-                        <h2 class="font-headline italic text-xl text-white leading-tight drop-shadow-lg">${item.caption || ''}</h2>
-                    </div>
-                    <div class="flex flex-col gap-6 items-center">
-                        <button class="group flex flex-col items-center gap-1" onclick="app.toggleLike('${item.id}')">
-                            <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
-                                <span class="material-symbols-outlined text-white" id="like-icon-${item.id}" data-icon="favorite">favorite</span>
-                            </div>
-                        </button>
-                        <button class="group flex flex-col items-center gap-1" onclick="app.saveBookmark('${item.id}')">
-                            <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
-                                <span class="material-symbols-outlined text-white" data-icon="bookmark_add">bookmark_add</span>
-                            </div>
-                        </button>
+                        <div class="flex flex-col gap-6 items-center">
+                            <button class="group flex flex-col items-center gap-1" id="like-btn-${item.id}" onclick="app.toggleLike('${item.id}')">
+                                <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
+                                    <span class="material-symbols-outlined transition-all" id="like-icon-${item.id}"
+                                        style="color: ${isLiked ? '#ffb4ab' : 'white'}; font-variation-settings: 'FILL' ${isLiked ? 1 : 0}">
+                                        favorite
+                                    </span>
+                                </div>
+                                <span class="text-white text-xs font-bold" id="like-count-${item.id}">${likeCount > 0 ? likeCount : ''}</span>
+                            </button>
+                            <button class="group flex flex-col items-center gap-1" onclick="app.saveBookmark('${item.id}')">
+                                <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
+                                    <span class="material-symbols-outlined text-white" id="bm-icon-${item.id}" data-icon="bookmark_add">bookmark_add</span>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -625,27 +654,81 @@ const app = {
     },
 
     async toggleLike(photo_id) {
-        let el = document.getElementById(`like-icon-${photo_id}`);
-        if(el.classList.contains('text-tertiary')) {
-            el.classList.remove('text-tertiary', 'fill-icon');
-            el.classList.add('text-white');
+        const el = document.getElementById(`like-icon-${photo_id}`);
+        const countEl = document.getElementById(`like-count-${photo_id}`);
+        const isLiked = el.style.fontVariationSettings.includes('1');
+        const myId = this.user.tg_id;
+
+        // Optimistically update UI first
+        if(isLiked) {
+            el.style.color = 'white';
             el.style.fontVariationSettings = "'FILL' 0";
-            await supabaseClient.from('photo_likes').delete().eq('user_id', this.user.tg_id).eq('photo_id', photo_id);
         } else {
-            el.classList.add('text-tertiary', 'fill-icon');
-            el.classList.remove('text-white');
+            el.style.color = '#ffb4ab';
             el.style.fontVariationSettings = "'FILL' 1";
-            await supabaseClient.from('photo_likes').insert({ user_id: this.user.tg_id, photo_id: photo_id });
+            el.style.transform = 'scale(1.3)';
+            setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
         }
+
+        // Read current likes array from DB
+        const { data: row } = await supabaseClient.from('gallery').select('likes').eq('id', photo_id).single();
+        let currentLikes = Array.isArray(row?.likes) ? [...row.likes] : [];
+
+        if(isLiked) {
+            currentLikes = currentLikes.filter(id => id !== myId);
+        } else {
+            if(!currentLikes.includes(myId)) currentLikes.push(myId);
+        }
+
+        await supabaseClient.from('gallery').update({ likes: currentLikes }).eq('id', photo_id);
+
+        // Update counter
+        if(countEl) countEl.textContent = currentLikes.length > 0 ? currentLikes.length : '';
     },
 
     async saveBookmark(photo_id) {
+        let el = document.getElementById(`bm-icon-${photo_id}`);
+        if(el) {
+            el.classList.add('text-secondary', 'fill-icon');
+            el.classList.remove('text-white');
+            el.style.fontVariationSettings = "'FILL' 1";
+        }
         await supabaseClient.from('bookmarks').insert({ user_id: this.user.tg_id, photo_id: photo_id });
         if(window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         } else {
             alert("Добавлено в закладки!");
         }
+    },
+
+    openBookmarks() {
+        const modal = document.getElementById('bookmarks-modal');
+        modal.classList.remove('hidden');
+        void modal.offsetWidth; // force reflow
+        modal.classList.remove('translate-x-full');
+        this.loadBookmarks();
+    },
+
+    closeBookmarks() {
+        const modal = document.getElementById('bookmarks-modal');
+        modal.classList.add('translate-x-full');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    },
+
+    openPhotoViewer(url) {
+        const modal = document.getElementById('photo-viewer-modal');
+        document.getElementById('viewer-img').src = url;
+        modal.classList.remove('hidden');
+        modal.classList.remove('opacity-0');
+    },
+
+    closePhotoViewer() {
+        const modal = document.getElementById('photo-viewer-modal');
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.getElementById('viewer-img').src = '';
+        }, 300);
     },
 
     async loadBookmarks() {
@@ -660,11 +743,12 @@ const app = {
         data.forEach(bm => {
             if(!bm.gallery) return;
             const item = document.createElement('div');
-            item.className = "w-full aspect-square rounded-xl overflow-hidden relative shadow bg-surface-container";
+            item.className = "w-full aspect-[3/4] rounded-xl overflow-hidden relative shadow-lg bg-surface-container active:scale-95 transition-transform cursor-pointer";
+            item.onclick = () => this.openPhotoViewer(bm.gallery.photo_url);
             item.innerHTML = `
-                <img src="${bm.gallery.photo_url}" class="w-full h-full object-cover opacity-80" />
-                <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2 text-xs truncate">
-                    ${bm.gallery.caption || ''}
+                <img src="${bm.gallery.photo_url}" class="w-full h-full object-cover" />
+                <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2 pt-6 text-xs text-white truncate font-medium">
+                    ${bm.gallery.caption || 'Летопись'}
                 </div>
             `;
             grid.appendChild(item);
