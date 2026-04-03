@@ -23,8 +23,8 @@ const app = {
         
         // PWA Header colors setup (тимуридский тёмный)
         if(window.Telegram && window.Telegram.WebApp) {
-            if(window.Telegram.WebApp.setHeaderColor) window.Telegram.WebApp.setHeaderColor('#0d0b18');
-            if(window.Telegram.WebApp.setBackgroundColor) window.Telegram.WebApp.setBackgroundColor('#0d0b18');
+            if(window.Telegram.WebApp.setHeaderColor) window.Telegram.WebApp.setHeaderColor('#26233a');
+            if(window.Telegram.WebApp.setBackgroundColor) window.Telegram.WebApp.setBackgroundColor('#26233a');
         }
         
         document.getElementById('onboarding-form').addEventListener('submit', this.handleOnboarding.bind(this));
@@ -231,11 +231,11 @@ const app = {
 
             const article = document.createElement('article');
             article.className = "group rounded-2xl overflow-hidden";
-            article.style.cssText = "background:linear-gradient(145deg,#1e1635,#130f26);border:1px solid rgba(201,162,39,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);";
+            article.style.cssText = "background:linear-gradient(145deg,#3b2f5c,#2d2745);border:1px solid rgba(201,162,39,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);";
             article.innerHTML = `
                 <div class="relative h-56 overflow-hidden">
                     <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${sqImg}"/>
-                    <div class="absolute inset-0" style="background:linear-gradient(to top, #130f26 0%, transparent 60%);"></div>
+                    <div class="absolute inset-0" style="background:linear-gradient(to top, #2d2745 0%, transparent 60%);"></div>
                     <div class="absolute top-4 left-4 tag-chronicle">Летопись</div>
                 </div>
                 <div class="p-5">
@@ -430,13 +430,13 @@ const app = {
             if (hasResult || !isActive) {
                 const p = resultDict[quiz.id]?.score || 0;
                 html = `
-                <div class="rounded-2xl p-5" style="background:rgba(30,22,53,0.5);border:1px solid rgba(201,162,39,0.1);opacity:0.75;">
+                <div class="rounded-2xl p-5" style="background:rgba(62,52,94,0.5);border:1px solid rgba(201,162,39,0.1);opacity:0.75;">
                     <div class="flex justify-between items-center mb-3">
                         <h4 class="font-headline text-base" style="color:rgba(232,221,196,0.6);">${quiz.title}</h4>
                         <span class="font-body text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider" style="background:rgba(201,162,39,0.1);color:rgba(201,162,39,0.5);">Завершено</span>
                     </div>
                     <div class="gold-divider my-3"></div>
-                    <div class="rounded-xl p-3 flex items-center justify-around" style="background:rgba(13,11,24,0.5);">
+                    <div class="rounded-xl p-3 flex items-center justify-around" style="background:rgba(38,35,58,0.5);">
                         <div class="flex flex-col items-center">
                             <span class="font-body text-xs uppercase mb-1 tracking-wider" style="color:rgba(181,168,130,0.5);">Очки</span>
                             <span class="font-headline text-xl font-bold" style="color:#c9a227;">${p}</span>
@@ -454,7 +454,7 @@ const app = {
                         </div>
                         <span class="material-symbols-outlined" data-icon="stars" style="color:#c9a227;font-variation-settings:'FILL' 1;">stars</span>
                     </div>
-                    <button class="w-full py-3 rounded-xl font-headline font-bold flex items-center justify-center gap-2 mt-3 active:scale-95 transition-all text-sm tracking-wide inner-glow" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#0d0b18;box-shadow:0 4px 16px rgba(201,162,39,0.25);" onclick="app.openQuiz('${quiz.id}', ${hasResult})">
+                    <button class="w-full py-3 rounded-xl font-headline font-bold flex items-center justify-center gap-2 mt-3 active:scale-95 transition-all text-sm tracking-wide inner-glow" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#26233a;box-shadow:0 4px 16px rgba(201,162,39,0.25);" onclick="app.openQuiz('${quiz.id}', ${hasResult})">
                         <span>Начать испытание</span>
                         <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
                     </button>
@@ -497,13 +497,13 @@ const app = {
         
         if(!qData) {
             container.innerHTML = `<h3 class="font-headline text-xl text-center mb-3" style="color:#f5d67a;">✦ Завершено! ✦</h3><div class="gold-divider my-3"></div><p class="text-center font-serif italic" style="color:rgba(232,221,196,0.8);">Верных ответов: ${c.score} из ${c.questions.length}. Очки будут начислены в казну знаний!</p>`;
-            document.getElementById('qm-actions').innerHTML = `<button onclick="app.submitQuizScore()" class="font-headline font-bold px-6 py-3 rounded-xl text-sm tracking-wide" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#0d0b18;">Завершить</button>`;
+            document.getElementById('qm-actions').innerHTML = `<button onclick="app.submitQuizScore()" class="font-headline font-bold px-6 py-3 rounded-xl text-sm tracking-wide" style="background:linear-gradient(135deg,#c9a227,#8a6b18);color:#26233a;">Завершить</button>`;
             return;
         }
 
         let optsHtml = '';
         qData.options.forEach((opt, idx) => {
-            optsHtml += `<button onclick="app.answerQuiz(${idx}, ${qData.correct})" class="w-full text-left p-4 rounded-xl mb-2 transition-all active:scale-98 font-body text-sm" style="background:rgba(13,11,24,0.8);border:1px solid rgba(201,162,39,0.15);color:#e8ddc4;">${opt}</button>`;
+            optsHtml += `<button onclick="app.answerQuiz(${idx}, ${qData.correct})" class="w-full text-left p-4 rounded-xl mb-2 transition-all active:scale-98 font-body text-sm" style="background:rgba(38,35,58,0.8);border:1px solid rgba(201,162,39,0.15);color:#e8ddc4;">${opt}</button>`;
         });
 
         container.innerHTML = `
@@ -767,7 +767,7 @@ const app = {
         document.querySelectorAll('.admin-sub-panel').forEach(el => el.classList.add('hidden'));
         // Сбросить все кнопки
         document.querySelectorAll('.admin-sub-tab').forEach(btn => {
-            btn.style.background = 'rgba(42,36,70,0.8)';
+            btn.style.background = 'rgba(68,59,102,0.8)';
             btn.style.color = 'rgba(232,221,196,0.5)';
             btn.style.border = '1px solid rgba(201,162,39,0.1)';
         });
@@ -778,7 +778,7 @@ const app = {
         const btn = document.getElementById(`admin-sub-btn-${tabName}`);
         if (btn) {
             btn.style.background = 'linear-gradient(135deg, #c9a227, #8a6b18)';
-            btn.style.color = '#0d0b18';
+            btn.style.color = '#26233a';
             btn.style.border = 'none';
         }
         // Загрузить данные
@@ -879,9 +879,9 @@ const app = {
             const createdAt = post.created_at ? new Date(post.created_at).toLocaleDateString('ru-RU') : '';
             const item = document.createElement('div');
             item.className = 'flex items-center gap-3 rounded-xl p-3';
-            item.style.cssText = 'background:rgba(13,11,24,0.7);border:1px solid rgba(201,162,39,0.12);';
+            item.style.cssText = 'background:rgba(38,35,58,0.7);border:1px solid rgba(201,162,39,0.12);';
             item.innerHTML = `
-                <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0" style="background:#1c1530;">
+                <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0" style="background:#3e345e;">
                     <img src="${post.image_url || ''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\"material-symbols-outlined\\" style=\\"color:rgba(201,162,39,0.3);display:block;text-align:center;line-height:3rem;\\">image</span>'" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -978,7 +978,7 @@ const app = {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1e1635',
+                        backgroundColor: '#3b2f5c',
                         titleColor: '#c9a227',
                         bodyColor: '#e8ddc4',
                         borderColor: 'rgba(201,162,39,0.3)',
@@ -1064,7 +1064,7 @@ const app = {
 
             const section = document.createElement('div');
             section.className = 'rounded-xl p-4';
-            section.style.cssText = 'background:rgba(13,11,24,0.7);border:1px solid rgba(201,162,39,0.12);';
+            section.style.cssText = 'background:rgba(38,35,58,0.7);border:1px solid rgba(201,162,39,0.12);';
             section.innerHTML = `
                 <h3 class="font-headline text-sm mb-3 pb-2" style="color:#c9a227;border-bottom:1px solid rgba(201,162,39,0.2);">${quiz.title}</h3>
                 <div class="space-y-2">
@@ -1109,7 +1109,7 @@ const app = {
             data.forEach(item => {
                 const userName = userMap[item.user_id] || 'Неизвестно';
                 dom.innerHTML += `
-                <div class="rounded-xl overflow-hidden" style="background:rgba(13,11,24,0.8);border:1px solid rgba(201,162,39,0.12);">
+                <div class="rounded-xl overflow-hidden" style="background:rgba(38,35,58,0.8);border:1px solid rgba(201,162,39,0.12);">
                     <div class="h-40 relative cursor-pointer" onclick="app.openPhotoViewer('${item.photo_url}')">
                         <img src="${item.photo_url}" class="w-full h-full object-cover"/>
                         <div class="absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[10px] font-medium" style="background:rgba(0,0,0,0.7);color:#e8ddc4;">@${userName}</div>

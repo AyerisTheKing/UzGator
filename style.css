@@ -4,7 +4,7 @@
 body {
   min-height: max(884px, 100dvh);
   overflow: hidden;
-  background-color: #0d0b18;
+  background-color: #26233a;
   font-family: 'Noto Serif', 'Georgia', serif;
 }
 
@@ -25,7 +25,7 @@ body {
 
 /* ─── Исторический фон: геометрический исламский узор ─── */
 .arabesque-pattern {
-    background-color: #0d0b18;
+    background-color: #26233a;
     background-image:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23c9a227' stroke-opacity='0.06' stroke-width='0.8'%3E%3Cpath d='M40 0 L80 40 L40 80 L0 40 Z'/%3E%3Cpath d='M40 10 L70 40 L40 70 L10 40 Z'/%3E%3Cpath d='M40 20 L60 40 L40 60 L20 40 Z'/%3E%3Ccircle cx='40' cy='40' r='8'/%3E%3Ccircle cx='0' cy='0' r='5'/%3E%3Ccircle cx='80' cy='0' r='5'/%3E%3Ccircle cx='0' cy='80' r='5'/%3E%3Ccircle cx='80' cy='80' r='5'/%3E%3C/g%3E%3C/svg%3E");
     background-size: 80px 80px;
@@ -33,7 +33,7 @@ body {
 
 /* ─── Имперский градиент заголовка ─── */
 .imperial-header-gradient {
-    background: linear-gradient(180deg, #1a0e35 0%, #0d0b18 100%);
+    background: linear-gradient(180deg, #362a59 0%, #26233a 100%);
 }
 
 /* ─── Золотое внутреннее свечение ─── */
@@ -79,7 +79,7 @@ body {
 
 /* ─── Нижняя навигация: тимуридский стиль ─── */
 #bottom-bar {
-    background: linear-gradient(180deg, #1c1530 0%, #130f26 100%);
+    background: linear-gradient(180deg, #3e345e 0%, #2d2745 100%);
     border-top: 1px solid rgba(201, 162, 39, 0.2);
     box-shadow: 0 -8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,162,39,0.1);
 }
@@ -107,14 +107,14 @@ body {
 
 /* ─── Карточки: пергаментный стиль ─── */
 .scroll-card {
-    background: linear-gradient(145deg, #1e1635 0%, #16112a 100%);
+    background: linear-gradient(145deg, #3b2f5c 0%, #31264b 100%);
     border: 1px solid rgba(201, 162, 39, 0.15);
     box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(201,162,39,0.08);
 }
 
 /* ─── Кнопки с золотым ободком ─── */
 .btn-imperial {
-    background: linear-gradient(135deg, #2a1f5a 0%, #1a1338 100%);
+    background: linear-gradient(135deg, #463778 0%, #2c224a 100%);
     border: 1px solid rgba(201, 162, 39, 0.4);
     color: #c9a227;
     box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,162,39,0.1);
@@ -151,7 +151,7 @@ body {
 
 /* ─── Загрузочный экран ─── */
 #screen-loading {
-    background: radial-gradient(ellipse at center, #1a1338 0%, #0d0b18 70%);
+    background: radial-gradient(ellipse at center, #2c224a 0%, #26233a 70%);
 }
 
 /* ─── Пульсирующий орнамент загрузки ─── */
@@ -169,7 +169,7 @@ body {
 
 /* ─── Модальные окна ─── */
 .modal-imperial {
-    background: linear-gradient(160deg, #1e1635 0%, #130f26 100%);
+    background: linear-gradient(160deg, #3b2f5c 0%, #2d2745 100%);
     border: 1px solid rgba(201, 162, 39, 0.2);
     box-shadow: 0 24px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201,162,39,0.1);
 }
@@ -180,8 +180,8 @@ body {
 input.input-imperial,
 textarea.input-imperial,
 select.input-imperial {
-    background: rgba(13, 11, 24, 0.9) !important;
-    background-color: rgba(13, 11, 24, 0.9) !important;
+    background: rgba(38, 35, 58, 0.9) !important;
+    background-color: rgba(38, 35, 58, 0.9) !important;
     border: 1px solid rgba(201, 162, 39, 0.22) !important;
     color: #e8ddc4 !important;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -223,7 +223,7 @@ select.input-imperial {
 /* ─── Значок квиза и рейтинга ─── */
 .badge-imperial {
     background: linear-gradient(135deg, #c9a227, #8a6b18);
-    color: #0d0b18;
+    color: #26233a;
     font-weight: 700;
 }
 

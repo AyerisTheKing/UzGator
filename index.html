@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-    <meta name="theme-color" content="#0d0b18">
+    <meta name="theme-color" content="#26233a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Наследие Амира Темура</title>
@@ -32,8 +32,8 @@
             -webkit-appearance: none !important;
             appearance: none !important;
             /* Перекрываем white через огромный inset box-shadow */
-            box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
-            -webkit-box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
+            -webkit-box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
             background-color: transparent !important;
             color: #e8ddc4 !important;
             border: 1px solid rgba(201, 162, 39, 0.25) !important;
@@ -56,19 +56,19 @@
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
         input:-webkit-autofill:active {
-            -webkit-box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
-            box-shadow: inset 0 0 0 9999px rgba(13, 11, 24, 0.97) !important;
+            -webkit-box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
+            box-shadow: inset 0 0 0 9999px rgba(38, 35, 58, 0.97) !important;
             -webkit-text-fill-color: #e8ddc4 !important;
         }
         select {
             -webkit-appearance: none !important;
             appearance: none !important;
-            background-color: rgba(13, 11, 24, 0.92) !important;
+            background-color: rgba(38, 35, 58, 0.92) !important;
             color: #e8ddc4 !important;
             border: 1px solid rgba(201, 162, 39, 0.25) !important;
         }
         select option {
-            background-color: #1c1530 !important;
+            background-color: #3e345e !important;
             color: #e8ddc4 !important;
         }
     </style>
@@ -81,11 +81,11 @@
                     colors: {
                         /* ══ ТИМУРИДСКАЯ ПАЛИТРА ══ */
                         /* Фон */
-                        "void":          "#0d0b18",   /* глубокий фон */
-                        "midnight":      "#130f26",   /* чуть светлее */
-                        "dusk":          "#1c1530",   /* карточки */
-                        "twilight":      "#251c3e",   /* приподнятые карточки */
-                        "shadow":        "#2e2452",   /* поверхность акцент */
+                        "void":          "#26233a",   /* глубокий фон */
+                        "midnight":      "#2d2745",   /* чуть светлее */
+                        "dusk":          "#3e345e",   /* карточки */
+                        "twilight":      "#4c3f73",   /* приподнятые карточки */
+                        "shadow":        "#5c4d8c",   /* поверхность акцент */
 
                         /* Золото */
                         "gold":          "#c9a227",   /* основное золото */
@@ -137,7 +137,7 @@
     <div class="fixed top-0 left-0 w-full h-1/3 imperial-header-gradient opacity-80 pointer-events-none z-[-1]"></div>
     <!-- Нижний виньетка -->
     <div class="fixed bottom-0 left-0 w-full h-1/4 pointer-events-none z-[-1]"
-         style="background: linear-gradient(0deg, #0d0b18 0%, transparent 100%);"></div>
+         style="background: linear-gradient(0deg, #26233a 0%, transparent 100%);"></div>
 
     <!-- ══ ЭКРАН ОНБОРДИНГА ══ -->
     <div id="screen-onboarding" class="absolute inset-0 z-50 flex flex-col pb-24 overflow-y-auto no-scrollbar pt-16 items-center px-6" style="display: none;">
@@ -154,7 +154,7 @@
                      style="border: 1px solid rgba(201,162,39,0.5);"></div>
                 <!-- Центр -->
                 <div class="w-16 h-16 rounded-full flex items-center justify-center"
-                     style="background: linear-gradient(135deg, #2a1f5a, #1a1338); border: 1px solid rgba(201,162,39,0.6);">
+                     style="background: linear-gradient(135deg, #463778, #2c224a); border: 1px solid rgba(201,162,39,0.6);">
                     <span class="material-symbols-outlined text-gold text-3xl" data-icon="history_edu">history_edu</span>
                 </div>
             </div>
@@ -173,7 +173,7 @@
 
         <!-- Форма регистрации -->
         <section class="w-full max-w-md rounded-2xl p-7 relative overflow-hidden flex-shrink-0"
-                 style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.08);">
+                 style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.08);">
             
             <!-- Угловые орнаменты -->
             <div class="absolute top-3 left-3 w-5 h-5 pointer-events-none opacity-40"
@@ -192,7 +192,7 @@
                     <div class="relative">
                         <input id="on-name" required
                                class="input-imperial w-full rounded-xl py-4 px-5 text-sm"
-                               style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);caret-color:#c9a227;"
+                               style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);caret-color:#c9a227;"
                                placeholder="Амир Темур" type="text"/>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
                         <div class="relative">
                             <select id="on-class"
                                     class="input-imperial w-full appearance-none rounded-xl py-4 px-5 text-sm"
-                                    style="background-color:rgba(13,11,24,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
+                                    style="background-color:rgba(38,35,58,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
                                 <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
                                 <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
                                 <option selected>11</option>
@@ -218,7 +218,7 @@
                         <div class="relative">
                             <select id="on-letter"
                                     class="input-imperial w-full appearance-none rounded-xl py-4 px-5 text-sm"
-                                    style="background-color:rgba(13,11,24,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
+                                    style="background-color:rgba(38,35,58,0.92)!important;color:#e8ddc4;border:1px solid rgba(201,162,39,0.25);">
                                 <option selected>А</option><option>Б</option><option>В</option><option>Г</option><option>Д</option><option>И</option>
                             </select>
                             <span class="material-symbols-outlined absolute right-4 top-4 text-gold-muted pointer-events-none text-sm" data-icon="expand_more">expand_more</span>
@@ -230,7 +230,7 @@
                 <div class="pt-2">
                     <button type="submit"
                             class="w-full py-4 px-6 rounded-xl font-headline font-bold text-sm tracking-wider relative overflow-hidden group active:scale-95 transition-all duration-150"
-                            style="background: linear-gradient(135deg, #c9a227 0%, #8a6b18 100%); color: #0d0b18; box-shadow: 0 8px 24px rgba(201,162,39,0.3);">
+                            style="background: linear-gradient(135deg, #c9a227 0%, #8a6b18 100%); color: #26233a; box-shadow: 0 8px 24px rgba(201,162,39,0.3);">
                         <span class="relative z-10">Вступить в Летопись</span>
                         <div class="absolute inset-0 opacity-0 group-active:opacity-20 bg-black transition-opacity"></div>
                     </button>
@@ -255,7 +255,7 @@
         <!-- ── ГЛАВНЫЙ ЗАГОЛОВОК ── -->
         <header id="main-header"
                 class="absolute top-0 w-full flex justify-between items-center px-5 pt-14 pb-4 z-50 backdrop-blur-xl"
-                style="background: linear-gradient(180deg, rgba(13,11,24,0.95) 0%, rgba(13,11,24,0.0) 100%);">
+                style="background: linear-gradient(180deg, rgba(38,35,58,0.95) 0%, rgba(38,35,58,0.0) 100%);">
             <div class="flex items-center gap-3">
                 <!-- Аватар с золотым ободком -->
                 <div class="w-9 h-9 rounded-full overflow-hidden shadow-inner"
@@ -323,7 +323,7 @@
                 
                 <!-- Карточка достижений -->
                 <section class="mb-6 p-6 rounded-2xl relative overflow-hidden"
-                         style="background: linear-gradient(145deg, #251c3e, #1e1635); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
+                         style="background: linear-gradient(145deg, #4c3f73, #3b2f5c); border: 1px solid rgba(201,162,39,0.2); box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
                     <!-- Декоративный фон -->
                     <div class="absolute top-0 right-0 p-4 opacity-5">
                         <span class="material-symbols-outlined text-gold" style="font-size:96px;" data-icon="cognition">cognition</span>
@@ -362,26 +362,26 @@
 
                 <!-- Навигация по под-вкладкам -->
                 <div class="sticky top-0 z-10 px-4 pb-3 pt-1 backdrop-blur-md border-b mb-4"
-                     style="background: rgba(13,11,24,0.95); border-color: rgba(201,162,39,0.15);">
+                     style="background: rgba(38,35,58,0.95); border-color: rgba(201,162,39,0.15);">
                     <div class="flex gap-2">
                         <button id="admin-sub-btn-manage"
                                 onclick="app.switchAdminTab('manage')"
                                 class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
-                                style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18;">
+                                style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #26233a;">
                             <span class="material-symbols-outlined text-base" data-icon="settings">settings</span>
                             <span>Управление</span>
                         </button>
                         <button id="admin-sub-btn-analytics"
                                 onclick="app.switchAdminTab('analytics')"
                                 class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
-                                style="background: rgba(42,36,70,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
+                                style="background: rgba(68,59,102,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
                             <span class="material-symbols-outlined text-base" data-icon="analytics">analytics</span>
                             <span>Аналитика</span>
                         </button>
                         <button id="admin-sub-btn-moderation"
                                 onclick="app.switchAdminTab('moderation')"
                                 class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
-                                style="background: rgba(42,36,70,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
+                                style="background: rgba(68,59,102,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
                             <span>Модерация</span>
                         </button>
                     </div>
@@ -392,7 +392,7 @@
                     
                     <!-- Форма: Создать летопись -->
                     <section class="p-5 rounded-2xl shadow-xl"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(201,162,39,0.15); border: 1px solid rgba(201,162,39,0.3);">
@@ -406,12 +406,12 @@
                         <form id="form-add-chronicle" class="space-y-3">
                             <input id="ac-title" placeholder="Заголовок" required
                                    class="input-imperial w-full rounded-xl p-3 text-sm"
-                                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+                                   style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
                             <textarea id="ac-text" placeholder="Текст летописи..." required
                                       class="input-imperial w-full rounded-xl p-3 resize-none text-sm" rows="3"
-                                      style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
+                                      style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
                             <div class="relative w-full rounded-xl p-3 flex items-center justify-center overflow-hidden transition-colors"
-                                 style="background: rgba(13,11,24,0.8); border: 1px dashed rgba(201,162,39,0.25);">
+                                 style="background: rgba(38,35,58,0.8); border: 1px dashed rgba(201,162,39,0.25);">
                                 <input type="file" id="ac-img-file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"/>
                                 <div class="flex items-center gap-2 pointer-events-none">
                                     <span class="material-symbols-outlined text-gold/40 text-xl" data-icon="add_photo_alternate">add_photo_alternate</span>
@@ -420,7 +420,7 @@
                             </div>
                             <button type="submit"
                                     class="w-full py-3 font-headline font-bold rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all text-sm tracking-wide"
-                                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18; box-shadow: 0 4px 16px rgba(201,162,39,0.25);">
+                                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #26233a; box-shadow: 0 4px 16px rgba(201,162,39,0.25);">
                                 <span class="material-symbols-outlined text-base" data-icon="publish">publish</span>
                                 Опубликовать
                             </button>
@@ -429,7 +429,7 @@
 
                     <!-- Форма: Создать квиз -->
                     <section class="p-5 rounded-2xl shadow-xl"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(26,92,158,0.2); border: 1px solid rgba(74,143,212,0.3);">
@@ -443,13 +443,13 @@
                         <form id="form-add-quiz" class="space-y-3">
                             <input id="aq-title" placeholder="Название квиза" required
                                    class="input-imperial w-full rounded-xl p-3 text-sm"
-                                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+                                   style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
                             <textarea id="aq-options-json"
                                       placeholder='[{"q":"Вопрос?","options":["A","B","C","D"],"correct":0}]' required
                                       class="input-imperial w-full rounded-xl p-3 resize-none font-mono text-xs" rows="4"
-                                      style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
+                                      style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"></textarea>
                             <div class="flex items-center gap-3 rounded-xl p-3"
-                                 style="background: rgba(13,11,24,0.8); border: 1px solid rgba(201,162,39,0.15);">
+                                 style="background: rgba(38,35,58,0.8); border: 1px solid rgba(201,162,39,0.15);">
                                 <span class="material-symbols-outlined text-gold/50 text-lg" data-icon="timer">timer</span>
                                 <div class="flex-1">
                                     <label class="block text-xs text-parchment-dim/60 mb-0.5">Длительность (часов)</label>
@@ -468,7 +468,7 @@
 
                     <!-- Управление записями -->
                     <section class="p-5 rounded-2xl shadow-xl"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
@@ -496,7 +496,7 @@
                 <div id="admin-panel-analytics" class="admin-sub-panel px-4 space-y-5 hidden">
                     <div class="grid grid-cols-2 gap-3">
                         <div class="rounded-2xl p-4 text-center"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                             <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
                                  style="background: rgba(201,162,39,0.15);">
                                 <span class="material-symbols-outlined text-gold text-lg" data-icon="group">group</span>
@@ -505,7 +505,7 @@
                             <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Участников</p>
                         </div>
                         <div class="rounded-2xl p-4 text-center"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                             <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
                                  style="background: rgba(26,92,158,0.2);">
                                 <span class="material-symbols-outlined text-lapis-light text-lg" data-icon="photo_library">photo_library</span>
@@ -514,7 +514,7 @@
                             <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Фото в галерее</p>
                         </div>
                         <div class="rounded-2xl p-4 text-center"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                             <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
                                  style="background: rgba(26,92,158,0.15);">
                                 <span class="material-symbols-outlined text-lapis-pale text-lg" data-icon="quiz">quiz</span>
@@ -523,7 +523,7 @@
                             <p class="text-[10px] text-parchment-dim/50 uppercase tracking-wider">Квизов</p>
                         </div>
                         <div class="rounded-2xl p-4 text-center"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                             <div class="w-9 h-9 rounded-xl mx-auto mb-2 flex items-center justify-center"
                                  style="background: rgba(201,162,39,0.1);">
                                 <span class="material-symbols-outlined text-gold-light text-lg" data-icon="leaderboard">leaderboard</span>
@@ -535,7 +535,7 @@
 
                     <!-- График активности -->
                     <section class="rounded-2xl p-5"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(201,162,39,0.15);">
@@ -553,7 +553,7 @@
 
                     <!-- Общий рейтинг -->
                     <section class="rounded-2xl p-5"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(201,162,39,0.15);">
@@ -571,7 +571,7 @@
 
                     <!-- Победители по квизам -->
                     <section class="rounded-2xl p-5"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(26,92,158,0.2);">
@@ -592,7 +592,7 @@
                 <div id="admin-panel-moderation" class="admin-sub-panel px-4 space-y-5 hidden">
                     
                     <section class="rounded-2xl p-5"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(139,26,42,0.2); border: 1px solid rgba(196,74,90,0.3);">
@@ -609,7 +609,7 @@
                     </section>
 
                     <section class="rounded-2xl p-5"
-                             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.15);">
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                                  style="background: rgba(201,162,39,0.15);">
@@ -632,7 +632,7 @@
         <!-- ══ НИЖНЯЯ НАВИГАЦИЯ ══ -->
         <nav id="bottom-bar"
              class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-5 pt-4"
-             style="background: linear-gradient(180deg, rgba(19,15,38,0.95) 0%, rgba(13,11,24,0.98) 100%);
+             style="background: linear-gradient(180deg, rgba(45,39,69,0.95) 0%, rgba(38,35,58,0.98) 100%);
                     border-top: 1px solid rgba(201,162,39,0.15);
                     box-shadow: 0 -8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,162,39,0.08);">
             
@@ -672,7 +672,7 @@
     <!-- ══ МОДАЛЬНОЕ ОКНО: КВИЗ ══ -->
     <div id="quiz-modal" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm hidden flex flex-col justify-center items-center px-4">
         <div class="w-full max-w-md rounded-2xl p-6 shadow-2xl relative"
-             style="background: linear-gradient(145deg, #1e1635, #130f26); border: 1px solid rgba(201,162,39,0.25); box-shadow: 0 24px 64px rgba(0,0,0,0.7);">
+             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.25); box-shadow: 0 24px 64px rgba(0,0,0,0.7);">
             <!-- Угловые орнаменты -->
             <div class="absolute top-3 left-3 w-4 h-4 pointer-events-none opacity-40"
                  style="border-top: 1px solid #c9a227; border-left: 1px solid #c9a227;"></div>
@@ -694,7 +694,7 @@
     <!-- ══ МОДАЛЬНОЕ ОКНО: ЗАГРУЗКА ФОТО ══ -->
     <div id="upload-modal" class="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm hidden flex flex-col justify-end">
         <div class="w-full rounded-t-3xl p-6 shadow-2xl relative animate-slide-up"
-             style="background: linear-gradient(160deg, #1c1530, #130f26); border-top: 1px solid rgba(201,162,39,0.2);">
+             style="background: linear-gradient(160deg, #3e345e, #2d2745); border-top: 1px solid rgba(201,162,39,0.2);">
             <button onclick="document.getElementById('upload-modal').classList.add('hidden')"
                     class="absolute top-4 right-4 text-parchment-dim/50 hover:text-parchment transition-colors">
                 <span class="material-symbols-outlined">close</span>
@@ -703,9 +703,9 @@
             <p class="text-sm text-parchment-dim/60 mb-4 font-body">Подпись (не более 30 символов)</p>
             <input type="text" id="upload-desc" maxlength="30"
                    class="input-imperial w-full rounded-xl p-4 mb-4"
-                   style="background-color:rgba(13,11,24,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
+                   style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);caret-color:#c9a227;"/>
             <button class="w-full py-4 rounded-xl font-headline font-bold text-sm tracking-wide active:scale-95 transition-all"
-                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #0d0b18; box-shadow: 0 8px 24px rgba(201,162,39,0.3);"
+                    style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #26233a; box-shadow: 0 8px 24px rgba(201,162,39,0.3);"
                     onclick="app.submitReel()">
                 Отправить на модерацию
             </button>
@@ -714,9 +714,9 @@
 
     <!-- ══ МОДАЛЬНОЕ ОКНО: ЗАКЛАДКИ ══ -->
     <div id="bookmarks-modal" class="fixed inset-0 z-[100] hidden flex-col transition-transform duration-300 translate-x-full"
-         style="background: #0d0b18;">
+         style="background: #26233a;">
         <div class="pt-16 px-5 pb-4 flex items-center justify-start gap-4"
-             style="background: linear-gradient(180deg, #130f26, #0d0b18); border-bottom: 1px solid rgba(201,162,39,0.15);">
+             style="background: linear-gradient(180deg, #2d2745, #26233a); border-bottom: 1px solid rgba(201,162,39,0.15);">
             <button onclick="app.closeBookmarks()"
                     class="text-parchment flex items-center gap-2 p-2 -ml-2 rounded-full transition-colors hover:bg-white/5">
                 <span class="material-symbols-outlined text-gold">arrow_back</span>
@@ -744,7 +744,7 @@
 
     <!-- ══ ЭКРАН ЗАГРУЗКИ ══ -->
     <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center transition-opacity duration-500"
-         style="background: radial-gradient(ellipse at center, #1a1338 0%, #0d0b18 70%);">
+         style="background: radial-gradient(ellipse at center, #2c224a 0%, #26233a 70%);">
         
         <!-- Орнаментная анимация загрузки -->
         <div class="relative flex items-center justify-center mb-6">
@@ -758,12 +758,12 @@
         <p class="font-serif italic text-parchment-dim/40 text-xs mt-2">Наследие Амира Темура</p>
     </div>
 
-    <script src="script.js?v=3.2"></script>
-    <script src="app.js?v=3.2"></script>
+    <script src="script.js?v=3.3"></script>
+    <script src="app.js?v=3.3"></script>
     <!-- Тёмный фон input: JS-хак против user-agent stylesheet Chromium -->
     <script>
     (function forceDarkInputs() {
-        const DARK_BG = 'rgba(13,11,24,0.95)';
+        const DARK_BG = 'rgba(38,35,58,0.95)';
         const STYLE   = `background-color:${DARK_BG}!important;` +
                         `color:#e8ddc4!important;` +
                         `border:1px solid rgba(201,162,39,0.25)!important;` +
