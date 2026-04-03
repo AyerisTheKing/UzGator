@@ -755,9 +755,33 @@ const app = {
         });
     },
 
+    // --- Admin Sub-Tab Navigation ---
+    switchAdminTab(tabName) {
+        // Hide all sub-panels
+        document.querySelectorAll('.admin-sub-panel').forEach(el => el.classList.add('hidden'));
+        // Reset all sub-tab buttons
+        document.querySelectorAll('.admin-sub-tab').forEach(btn => {
+            btn.classList.remove('bg-primary-container', 'text-on-primary', 'bg-tertiary-container', 'text-on-tertiary');
+            btn.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+        // Show selected panel
+        const panel = document.getElementById(`admin-panel-${tabName}`);
+        if (panel) panel.classList.remove('hidden');
+        // Activate selected button
+        const btn = document.getElementById(`admin-sub-btn-${tabName}`);
+        if (btn) {
+            btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+            btn.classList.add('bg-primary-container', 'text-on-primary');
+        }
+        // Load data for the tab
+        if (tabName === 'analytics') this.loadAnalytics();
+        if (tabName === 'moderation') this.loadModerationFeed();
+    },
+
     // --- Admin ---
     async loadAdminPanel() {
-        this.loadModerationFeed();
+        this.switchAdminTab('manage');
+        this.loadAdminPostsList();
     },
 
     async adminAddChronicle(e) {
@@ -768,8 +792,8 @@ const app = {
         const file = fileInput ? fileInput.files[0] : null;
 
         const btn = e.target.querySelector('button[type="submit"]');
-        btn.textContent = "Публикация...";
         btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base">progress_activity</span> Публикация...`;
 
         try {
             let pubUrl = null;
@@ -791,16 +815,14 @@ const app = {
             alert('Запись опубликована!');
             e.target.reset();
             const label = document.getElementById('ac-file-label');
-            if(label) {
-                label.textContent = 'Выберите Изображение из телефона';
-                label.classList.remove('text-secondary');
-            }
-            this.loadChronicle(); // Reload immediately so user sees it!
+            if(label) { label.textContent = 'Выберите обложку'; label.classList.remove('text-secondary'); }
+            this.loadChronicle();
+            this.loadAdminPostsList();
         } catch(err) {
             alert("Ошибка публикации: " + err.message);
         } finally {
-            btn.textContent = "Опубликовать";
             btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-outlined text-base" data-icon="publish">publish</span> Опубликовать`;
         }
     },
 
@@ -822,50 +844,316 @@ const app = {
             });
             alert('Квиз сохранен и уже запущен!');
             e.target.reset();
-            this.loadQuizzes(); // update the list
+            this.loadQuizzes();
         } catch (err) {
             alert('Неверный формат JSON');
         }
     },
 
-    async loadModerationFeed() {
-        const dom = document.getElementById('mod-feed');
-        dom.innerHTML = 'Загрузка...';
-        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', false);
-        if(error) console.error("Moderation Load Error:", error);
-        
-        document.getElementById('mod-count').textContent = data ? `${data.length} ожидают` : '0 ожидают';
-        
-        if(!data || data.length === 0) {
-            dom.innerHTML = '<p class="text-on-surface-variant ml-2">Все чисто!</p>';
+    // --- Admin: Posts List with Delete ---
+    async loadAdminPostsList() {
+        const dom = document.getElementById('admin-posts-list');
+        if (!dom) return;
+        dom.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Загрузка...</p>';
+        const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+        if (error || !data || data.length === 0) {
+            dom.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Нет записей</p>';
+            return;
+        }
+        dom.innerHTML = '';
+        data.forEach(post => {
+            let titleText = 'Запись';
+            try {
+                const parsed = JSON.parse(post.text_content);
+                if (parsed.title) titleText = parsed.title;
+            } catch(e) { titleText = post.text_content?.substring(0, 40) || 'Без заголовка'; }
+
+            const createdAt = post.created_at ? new Date(post.created_at).toLocaleDateString('ru-RU') : '';
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 bg-surface-container-lowest rounded-xl p-3 border border-outline-variant/10';
+            item.innerHTML = `
+                <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+                    <img src="${post.image_url || ''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\"material-symbols-outlined text-outline m-auto block text-center leading-[3rem]\\">image</span>'" />
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-on-surface truncate">${titleText}</p>
+                    <p class="text-xs text-on-surface-variant">${createdAt}</p>
+                </div>
+                <button onclick="app.deletePost('${post.id}', this)" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-error/20 text-error transition-colors active:scale-90">
+                    <span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+                </button>
+            `;
+            dom.appendChild(item);
+        });
+    },
+
+    async deletePost(id, btn) {
+        if (!confirm('Удалить эту запись летописи навсегда?')) return;
+        btn.disabled = true;
+        const { error } = await supabaseClient.from('posts').delete().eq('id', id);
+        if (error) { alert('Ошибка удаления'); btn.disabled = false; return; }
+        btn.closest('div.flex').remove();
+        this.loadChronicle();
+    },
+
+    // --- Admin: Analytics ---
+    async loadAnalytics() {
+        // Fetch all stats in parallel
+        const [usersRes, photosRes, quizzesRes, resultsRes] = await Promise.all([
+            supabaseClient.from('users').select('created_at', { count: 'exact' }),
+            supabaseClient.from('gallery').select('id', { count: 'exact' }).eq('is_moderated', true),
+            supabaseClient.from('quizzes').select('id', { count: 'exact' }),
+            supabaseClient.from('quiz_results').select('user_id, score, created_at, quiz_id', { count: 'exact' })
+        ]);
+
+        // Update stat cards
+        document.getElementById('stat-total-users').textContent = usersRes.count ?? '—';
+        document.getElementById('stat-total-photos').textContent = photosRes.count ?? '—';
+        document.getElementById('stat-total-quizzes').textContent = quizzesRes.count ?? '—';
+        document.getElementById('stat-total-results').textContent = resultsRes.count ?? '—';
+
+        // Activity Chart (registrations per day for last 14 days)
+        this.renderActivityChart(usersRes.data || []);
+
+        // Overall Leaderboard
+        this.renderOverallLeaderboard(resultsRes.data || []);
+
+        // Per-quiz winners
+        this.renderPerQuizWinners(resultsRes.data || []);
+    },
+
+    renderActivityChart(usersData) {
+        const canvas = document.getElementById('activity-chart');
+        if (!canvas) return;
+
+        // Destroy previous chart if exists
+        if (this._activityChart) { this._activityChart.destroy(); this._activityChart = null; }
+
+        // Build last 14 days labels
+        const days = [];
+        const counts = {};
+        for (let i = 13; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            days.push(d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }));
+            counts[key] = 0;
+        }
+
+        usersData.forEach(u => {
+            if (u.created_at) {
+                const key = u.created_at.split('T')[0];
+                if (counts[key] !== undefined) counts[key]++;
+            }
+        });
+
+        const values = Object.values(counts);
+
+        this._activityChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: days,
+                datasets: [{
+                    label: 'Регистрации',
+                    data: values,
+                    backgroundColor: 'rgba(67, 226, 210, 0.3)',
+                    borderColor: '#43e2d2',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#171f33',
+                        titleColor: '#43e2d2',
+                        bodyColor: '#dae2fd',
+                        borderColor: '#444653',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#8e909e', font: { size: 10 } }, grid: { display: false } },
+                    y: { ticks: { color: '#8e909e', stepSize: 1 }, grid: { color: 'rgba(68,70,83,0.3)' }, beginAtZero: true }
+                }
+            }
+        });
+    },
+
+    async renderOverallLeaderboard(resultsData) {
+        const dom = document.getElementById('overall-leaderboard');
+        if (!dom) return;
+
+        // Aggregate scores per user
+        const scoremap = {};
+        resultsData.forEach(r => {
+            scoremap[r.user_id] = (scoremap[r.user_id] || 0) + (r.score || 0);
+        });
+
+        if (Object.keys(scoremap).length === 0) {
+            dom.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Нет данных</p>';
             return;
         }
 
-        // Local Join
-        const userIds = [...new Set(data.map(g => g.user_id))];
-        const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name').in('tg_id', userIds);
+        // Fetch user names
+        const userIds = Object.keys(scoremap);
+        const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name, class_info').in('tg_id', userIds);
         const userMap = {};
-        if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text; });
+        if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u; });
 
+        // Sort by score desc
+        const sorted = Object.entries(scoremap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const medals = ['🥇', '🥈', '🥉'];
+
+        dom.innerHTML = sorted.map(([uid, score], idx) => {
+            const u = userMap[uid];
+            const name = u?.full_name?.text || 'Участник';
+            const cls = u?.class_info ? `${u.class_info.num}${u.class_info.letter}` : '';
+            const medal = medals[idx] || `${idx + 1}.`;
+            const isTop = idx < 3;
+            return `
+            <div class="flex items-center gap-3 p-3 rounded-xl ${isTop ? 'bg-surface-container' : ''}">
+                <span class="text-xl w-8 text-center shrink-0">${medal}</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-on-surface truncate">${name}</p>
+                    <p class="text-xs text-on-surface-variant">${cls ? `Класс ${cls}` : ''}</p>
+                </div>
+                <span class="font-bold text-tertiary text-sm shrink-0">${score} очк.</span>
+            </div>`;
+        }).join('');
+    },
+
+    async renderPerQuizWinners(resultsData) {
+        const dom = document.getElementById('per-quiz-winners');
+        if (!dom) return;
+
+        // Fetch quizzes
+        const { data: quizzes } = await supabaseClient.from('quizzes').select('id, title');
+        if (!quizzes || quizzes.length === 0) {
+            dom.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Нет квизов</p>';
+            return;
+        }
+
+        // Fetch user names
+        const userIds = [...new Set(resultsData.map(r => r.user_id))];
+        let userMap = {};
+        if (userIds.length > 0) {
+            const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name').in('tg_id', userIds);
+            if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text || 'Участник'; });
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        dom.innerHTML = '';
+
+        quizzes.forEach(quiz => {
+            const quizResults = resultsData.filter(r => r.quiz_id === quiz.id).sort((a, b) => b.score - a.score).slice(0, 3);
+            if (quizResults.length === 0) return;
+
+            const section = document.createElement('div');
+            section.className = 'bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/10';
+            section.innerHTML = `
+                <h3 class="font-headline text-sm text-secondary mb-3 pb-2 border-b border-outline-variant/20">${quiz.title}</h3>
+                <div class="space-y-2">
+                    ${quizResults.map((r, idx) => `
+                    <div class="flex items-center gap-2">
+                        <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.  '}</span>
+                        <span class="flex-1 text-sm text-on-surface truncate">${userMap[r.user_id] || 'Участник'}</span>
+                        <span class="font-bold text-tertiary text-xs shrink-0">${r.score} очк.</span>
+                    </div>`).join('')}
+                </div>
+            `;
+            dom.appendChild(section);
+        });
+
+        if (dom.innerHTML === '') {
+            dom.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Нет результатов</p>';
+        }
+    },
+
+    // --- Admin: Moderation ---
+    async loadModerationFeed() {
+        const dom = document.getElementById('mod-feed');
+        const countEl = document.getElementById('mod-count');
+        if (!dom) return;
+        dom.innerHTML = '<p class="text-on-surface-variant text-sm">Загрузка...</p>';
+
+        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', false).order('created_at', { ascending: false });
+        if (error) console.error("Moderation Load Error:", error);
+
+        if (countEl) countEl.textContent = data ? `${data.length} ожидают проверки` : '0 ожидают';
+
+        if (!data || data.length === 0) {
+            dom.innerHTML = '<p class="text-on-surface-variant text-sm py-4 text-center">✅ Всё одобрено!</p>';
+        } else {
+            // Fetch user names
+            const userIds = [...new Set(data.map(g => g.user_id))];
+            const { data: usersData } = await supabaseClient.from('users').select('tg_id, full_name').in('tg_id', userIds);
+            const userMap = {};
+            if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u.full_name?.text; });
+
+            dom.innerHTML = '';
+            data.forEach(item => {
+                const userName = userMap[item.user_id] || 'Неизвестно';
+                dom.innerHTML += `
+                <div class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/10">
+                    <div class="h-40 relative cursor-pointer" onclick="app.openPhotoViewer('${item.photo_url}')">
+                        <img src="${item.photo_url}" class="w-full h-full object-cover"/>
+                        <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded-lg text-[10px] text-white font-medium">@${userName}</div>
+                        <div class="absolute top-2 right-2 w-6 h-6 bg-black/40 flex items-center justify-center rounded-full">
+                            <span class="material-symbols-outlined text-white text-sm">fullscreen</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-xs text-on-surface-variant mb-3 truncate">"${item.caption || 'Без подписи'}"</p>
+                        <div class="flex gap-2">
+                            <button class="flex-1 py-2 bg-secondary/15 text-secondary border border-secondary/30 rounded-lg text-xs font-bold active:scale-95 transition-all" onclick="app.modAction('${item.id}', 'approve')">
+                                ✓ Одобрить
+                            </button>
+                            <button class="flex-1 py-2 bg-error/10 text-error border border-error/20 rounded-lg text-xs font-bold active:scale-95 transition-all" onclick="app.modAction('${item.id}', 'delete')">
+                                ✕ Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // Load approved photos section below
+        this.loadApprovedFeed();
+    },
+
+    async loadApprovedFeed() {
+        const dom = document.getElementById('approved-feed');
+        const countEl = document.getElementById('approved-count');
+        if (!dom) return;
+        dom.innerHTML = '<p class="col-span-2 text-on-surface-variant text-sm">Загрузка...</p>';
+
+        const { data, error } = await supabaseClient.from('gallery').select('*').eq('is_moderated', true).order('created_at', { ascending: false });
+        if (error) { console.error(error); return; }
+        if (countEl) countEl.textContent = `${data?.length || 0} фото в галерее`;
+        if (!data || data.length === 0) {
+            dom.innerHTML = '<p class="col-span-2 text-on-surface-variant text-sm py-4 text-center">Нет одобренных фото</p>';
+            return;
+        }
         dom.innerHTML = '';
         data.forEach(item => {
-            const userName = userMap[item.user_id] || 'Неизвестно';
-            dom.innerHTML += `
-            <div class="bg-surface-container-low rounded-xl overflow-hidden shadow-lg border border-outline-variant/10">
-                <div class="h-40 relative">
-                    <img src="${item.photo_url}" class="w-full h-full object-cover" />
-                    <div class="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-[10px] text-white">от: ${userName}</div>
+            const card = document.createElement('div');
+            card.className = 'relative aspect-square rounded-xl overflow-hidden bg-surface-container group cursor-pointer';
+            card.innerHTML = `
+                <img src="${item.photo_url}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2">
+                    <span class="text-[10px] text-white truncate flex-1">${item.caption || ''}</span>
+                    <button onclick="event.stopPropagation(); app.modAction('${item.id}', 'delete')" class="w-7 h-7 bg-error/80 flex items-center justify-center rounded-full shrink-0 active:scale-90">
+                        <span class="material-symbols-outlined text-white text-sm">delete</span>
+                    </button>
                 </div>
-                <div class="p-4 flex flex-col gap-4">
-                    <div class="flex justify-between items-start">
-                        <span class="text-xs font-medium text-on-surface">"${item.caption || 'Без подписи'}"</span>
-                    </div>
-                <div class="flex gap-2">
-                    <button class="flex-1 py-2 bg-secondary/20 text-secondary border border-secondary/30 rounded-lg text-xs font-bold hover:bg-secondary/30 transition-colors" onclick="app.modAction('${item.id}', 'approve')">Одобрить</button>
-                    <button class="flex-1 py-2 bg-error/10 text-error border border-error/20 rounded-lg text-xs font-bold hover:bg-error/20 transition-colors" onclick="app.modAction('${item.id}', 'delete')">Удалить</button>
-                </div>
-                </div>
-            </div>`;
+                <div class="absolute inset-0" onclick="app.openPhotoViewer('${item.photo_url}')"></div>
+            `;
+            dom.appendChild(card);
         });
     },
 
@@ -873,6 +1161,7 @@ const app = {
         if(action === 'approve') {
             await supabaseClient.from('gallery').update({is_moderated: true}).eq('id', id);
         } else {
+            if (!confirm('Удалить это фото?')) return;
             await supabaseClient.from('gallery').delete().eq('id', id);
         }
         this.loadModerationFeed();
