@@ -17,6 +17,14 @@ const app = {
     user: null,
     currentTab: 'chronicle',
     
+    removeLoader() {
+        const l = document.getElementById('screen-loading');
+        if(l) {
+            l.style.opacity = '0';
+            setTimeout(() => l.remove(), 500);
+        }
+    },
+    
     init() {
         if(tg.expand) tg.expand();
         if(tg.ready) tg.ready();
@@ -37,7 +45,6 @@ const app = {
              }
              document.getElementById('upload-reel-file').click();
         });
-        document.getElementById('upload-reel-file').addEventListener('change', this.handlePhotoSelection.bind(this));
         document.getElementById('upload-reel-file').addEventListener('change', this.handlePhotoSelection.bind(this));
 
         // Admin Forms
@@ -63,7 +70,7 @@ const app = {
             this.checkUser();
         } else {
             console.warn("Supabase not defined! Run in environment with Supabase script.");
-            if (typeof removeLoader !== 'undefined') removeLoader();
+            this.removeLoader();
             document.getElementById('screen-onboarding').style.display = 'flex';
         }
     },
@@ -81,10 +88,12 @@ const app = {
                 this.user = data;
                 this.bootMainApp();
             } else {
+                this.removeLoader();
                 document.getElementById('screen-onboarding').style.display = 'flex';
             }
         } catch(e) {
             console.error("Auth check failed:", e);
+            this.removeLoader();
             document.getElementById('screen-onboarding').style.display = 'flex';
         }
     },
@@ -129,6 +138,7 @@ const app = {
     },
 
     async bootMainApp() {
+        this.removeLoader();
         document.getElementById('screen-main').style.display = 'flex';
         document.getElementById('screen-onboarding').style.display = 'none';
         
@@ -1032,16 +1042,17 @@ const app = {
         const sorted = Object.entries(scoremap).sort((a, b) => {
             if (b[1] !== a[1]) return b[1] - a[1];
             return (timemap[a[0]] || Infinity) - (timemap[b[0]] || Infinity);
-        }).slice(0, 10);
+        }).slice(0, 20);
         
         const medals = ['🥇', '🥈', '🥉'];
 
-        dom.innerHTML = sorted.map(([uid, score], idx) => {
+        let html = sorted.map(([uid, score], idx) => {
             const u = userMap[uid];
             const name = u?.full_name?.text || 'Участник';
             const cls = u?.class_info ? `${u.class_info.num}${u.class_info.letter}` : '';
             const medal = medals[idx] || `${idx + 1}.`;
             const isTop = idx < 3;
+            const extraClass = idx >= 5 ? 'overall-item-extra hidden' : '';
             
             // Format time for overall leaderboard
             const userTime = timemap[uid] || 0;
@@ -1053,7 +1064,7 @@ const app = {
             }
 
             return `
-            <div class="flex items-center gap-3 p-3 rounded-xl" style="${isTop ? 'background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.1);' : ''}">
+            <div class="flex items-center gap-3 p-3 rounded-xl ${extraClass}" style="${isTop ? 'background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.1);' : ''}">
                 <span class="text-xl w-8 text-center shrink-0">${medal}</span>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold truncate" style="color:#e8ddc4;">${name}</p>
@@ -1065,6 +1076,20 @@ const app = {
                 <span class="font-bold text-sm shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${score} очк.</span>
             </div>`;
         }).join('');
+
+        if (sorted.length > 5) {
+            const remaining = sorted.length - 5;
+            html += `
+            <button id="overall-btn-show-more" class="w-full mt-3 py-2 text-xs font-bold rounded-lg transition-all active:scale-95" style="background:rgba(201,162,39,0.1);color:#c9a227;border:1px solid rgba(201,162,39,0.25);" onclick="document.querySelectorAll('.overall-item-extra').forEach(el=>el.classList.remove('hidden')); this.classList.add('hidden'); document.getElementById('overall-btn-collapse').classList.remove('hidden');">
+                Показать еще ${remaining}
+            </button>
+            <button id="overall-btn-collapse" class="hidden w-full mt-3 py-2 text-xs font-bold rounded-lg transition-all active:scale-95" style="background:rgba(139,26,42,0.15);color:#c44a5a;border:1px solid rgba(196,74,90,0.2);" onclick="document.querySelectorAll('.overall-item-extra').forEach(el=>el.classList.add('hidden')); this.classList.add('hidden'); document.getElementById('overall-btn-show-more').classList.remove('hidden');">
+                Свернуть
+            </button>
+            `;
+        }
+
+        dom.innerHTML = html;
     },
 
     async renderPerQuizWinners(resultsData) {
@@ -1225,41 +1250,6 @@ const app = {
         this.loadModerationFeed();
     }
 };
-
-function removeLoader() {
-    const l = document.getElementById('screen-loading');
-    if(l) {
-        l.style.opacity = '0';
-        setTimeout(() => l.remove(), 500);
-    }
-}
-
-// Override boot functions to remove loader
-const originalBoot = app.bootMainApp.bind(app);
-app.bootMainApp = function() {
-    removeLoader();
-    originalBoot();
-}
-
-const originalCheck = app.checkUser.bind(app);
-app.checkUser = async function() {
-    try {
-        const uid = tg.initDataUnsafe?.user?.id;
-        if(!uid) throw new Error("No user id, falling back to onboarding");
-        const { data, error } = await supabaseClient.from('users').select('*').eq('tg_id', uid).single();
-        if(data) {
-            this.user = data;
-            this.bootMainApp();
-        } else {
-            removeLoader();
-            document.getElementById('screen-onboarding').style.display = 'flex';
-        }
-    } catch(e) {
-        console.warn(e);
-        removeLoader();
-        document.getElementById('screen-onboarding').style.display = 'flex';
-    }
-}
 
 if(document.readyState !== 'loading') {
     app.init();
