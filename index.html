@@ -301,26 +301,34 @@
                 <!-- Навигация по под-вкладкам -->
                 <div class="sticky top-0 z-10 px-4 pb-3 pt-1 backdrop-blur-md border-b mb-4"
                      style="background: rgba(38,35,58,0.95); border-color: rgba(201,162,39,0.15);">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                         <button id="admin-sub-btn-manage"
                                 onclick="app.switchAdminTab('manage')"
-                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                class="admin-sub-tab shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
                                 style="background: linear-gradient(135deg, #c9a227, #8a6b18); color: #26233a;">
                             <span class="material-symbols-outlined text-base" data-icon="settings">settings</span>
                             <span>Управление</span>
                         </button>
                         <button id="admin-sub-btn-analytics"
                                 onclick="app.switchAdminTab('analytics')"
-                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                class="admin-sub-tab shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
                                 style="background: rgba(68,59,102,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
                             <span class="material-symbols-outlined text-base" data-icon="analytics">analytics</span>
                             <span>Аналитика</span>
                         </button>
                         <button id="admin-sub-btn-moderation"
                                 onclick="app.switchAdminTab('moderation')"
-                                class="admin-sub-tab flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                class="admin-sub-tab shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
                                 style="background: rgba(68,59,102,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
+                            <span class="material-symbols-outlined text-base" data-icon="shield">shield</span>
                             <span>Модерация</span>
+                        </button>
+                        <button id="admin-sub-btn-console"
+                                onclick="app.switchAdminTab('console')"
+                                class="admin-sub-tab shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200"
+                                style="background: rgba(68,59,102,0.8); color: rgba(232,221,196,0.5); border: 1px solid rgba(201,162,39,0.1);">
+                            <span class="material-symbols-outlined text-base" data-icon="terminal">terminal</span>
+                            <span>Логи</span>
                         </button>
                     </div>
                 </div>
@@ -564,6 +572,36 @@
                     </section>
                 </div>
 
+                <!-- ── ПОД-ВКЛАДКА 4: КОНСОЛЬ (ЛОГИ) ── -->
+                <div id="admin-panel-console" class="admin-sub-panel px-4 space-y-5 hidden">
+                    <section class="rounded-2xl p-5"
+                             style="background: linear-gradient(145deg, #3b2f5c, #2d2745); border: 1px solid rgba(201,162,39,0.15);">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                 style="background: rgba(201,162,39,0.15);">
+                                <span class="material-symbols-outlined text-gold text-lg" data-icon="terminal">terminal</span>
+                            </div>
+                            <div>
+                                <h2 class="font-headline text-sm text-parchment tracking-wide">Пользователи и Действия</h2>
+                                <p class="text-xs text-parchment-dim/60">Логи, онлайн, текущая вкладка</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2 mb-4">
+                            <button onclick="app.loadConsole()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-gold/10 border border-gold/20 active:scale-95 transition-all text-gold">
+                                <span class="material-symbols-outlined text-sm">refresh</span>
+                            </button>
+                            <input type="text" id="console-search" placeholder="Поиск по имени..." 
+                                   class="input-imperial flex-1 rounded-xl px-3 text-sm"
+                                   style="background-color:rgba(38,35,58,0.92);color:#e8ddc4;border:1px solid rgba(201,162,39,0.22);"
+                                   oninput="app.filterConsoleUsers()"/>
+                        </div>
+
+                        <div id="console-users-list" class="space-y-3">
+                            <p class="text-parchment-dim/50 text-sm py-2">Нажмите кнопку обновления</p>
+                        </div>
+                    </section>
+                </div>
             </div>
         </main>
 
@@ -696,8 +734,7 @@
         <p class="font-serif italic text-parchment-dim/40 text-xs mt-2">Наследие Амира Темура</p>
     </div>
 
-    <script src="script.js?v=3.9"></script>
-    <script src="app.js?v=3.9"></script>
+    <script src="app.js?v=4.5"></script>
 
 </body>
 </html>

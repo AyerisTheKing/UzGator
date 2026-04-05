@@ -16,6 +16,27 @@ const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_U
 const app = {
     user: null,
     currentTab: 'chronicle',
+    consoleUsersData: [],
+    
+    async logAction(actionText) {
+        if (!this.user || !supabaseClient) return;
+        try {
+            await supabaseClient.from('user_logs').insert({
+                user_id: this.user.tg_id,
+                action: actionText
+            });
+        } catch(e) { console.error('Ошибка логирования:', e); }
+    },
+
+    async updatePresence(tabString) {
+        if (!this.user || !supabaseClient) return;
+        try {
+            await supabaseClient.from('users').update({
+                last_seen: new Date().toISOString(),
+                current_tab: tabString
+            }).eq('tg_id', this.user.tg_id);
+        } catch(e) { console.error('Ошибка updatePresence:', e); }
+    },
     
     removeLoader() {
         const l = document.getElementById('screen-loading');
@@ -100,40 +121,48 @@ const app = {
 
     async handleOnboarding(e) {
         e.preventDefault();
-        const name = document.getElementById('on-name').value.trim();
-        const cls = document.getElementById('on-class').value;
-        const letter = document.getElementById('on-letter').value;
-        const uid = tg.initDataUnsafe?.user?.id || Date.now();
-        
-        // 1. Check if name already exists
-        const { data: existingUser } = await supabaseClient
-            .from('users')
-            .select('tg_id')
-            .eq('full_name->>text', name)
-            .maybeSingle();
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
 
-        if (existingUser && existingUser.tg_id !== uid) {
-            alert("Это имя уже занято! Пожалуйста, добавьте к имени первую букву фамилии или используйте другое имя.");
-            return;
-        }
+        try {
+            const name = document.getElementById('on-name').value.trim();
+            const cls = document.getElementById('on-class').value;
+            const letter = document.getElementById('on-letter').value;
+            const uid = tg.initDataUnsafe?.user?.id || Date.now();
+            
+            const { data: existingUser } = await supabaseClient
+                .from('users')
+                .select('tg_id')
+                .eq('full_name->>text', name)
+                .maybeSingle();
 
-        // Match user schema exactly
-        const payload = {
-            tg_id: uid,
-            full_name: { text: name },
-            class_info: { num: parseInt(cls), letter: letter },
-            is_admin: false,
-            is_banned_photo: false
-        };
+            if (existingUser && existingUser.tg_id !== uid) {
+                alert("Это имя уже занято! Смените имя.");
+                if (btn) btn.disabled = false;
+                return;
+            }
 
-        const { error } = await supabaseClient.from('users').upsert(payload, { onConflict: 'tg_id' });
-        if(!error) {
+            const payload = {
+                tg_id: uid,
+                full_name: { text: name },
+                class_info: { num: parseInt(cls), letter: letter },
+                is_admin: false,
+                is_banned_photo: false,
+                last_seen: new Date().toISOString(),
+                current_tab: 'onboarding'
+            };
+
+            const { error } = await supabaseClient.from('users').upsert(payload, { onConflict: 'tg_id' });
+            if(error) throw error;
+            
             this.user = payload;
+            this.logAction('Прошел регистрацию: ' + name);
             document.getElementById('screen-onboarding').style.display = 'none';
             this.bootMainApp();
-        } else {
-            console.error(error);
+        } catch(err) {
+            console.error(err);
             alert("Ошибка при регистрации");
+            if (btn) btn.disabled = false;
         }
     },
 
@@ -204,6 +233,7 @@ const app = {
         }
 
         this.currentTab = tabName;
+        this.updatePresence(tabName);
         
         if(tabName === 'chronicle') this.loadChronicle();
         if(tabName === 'quizzes') this.loadQuizzes();
@@ -536,25 +566,35 @@ const app = {
 
     async submitQuizScore() {
         const c = this.currentQuiz;
-        const addedScore = c.score * 10;
-        const endTime = new Date();
+        const btn = document.querySelector('#qm-actions button');
+        if (btn) btn.disabled = true;
 
-        await supabaseClient.from('quiz_results').insert({
-            user_id: this.user.tg_id,
-            quiz_id: c.data.id,
-            score: addedScore,
-            answers_log: c.answersLog,
-            created_at: c.startTime.toISOString(),
-            completed_at: endTime.toISOString()
-        });
+        try {
+            const addedScore = c.score * 10;
+            const endTime = new Date();
 
-        // Add to local UI points
-        const newPts = (this.user.points || 0) + addedScore;
-        this.user.points = newPts;
-        document.getElementById('user-total-score').textContent = newPts;
-        
-        this.closeQuiz();
-        this.loadQuizzes();
+            await supabaseClient.from('quiz_results').insert({
+                user_id: this.user.tg_id,
+                quiz_id: c.data.id,
+                score: addedScore,
+                answers_log: c.answersLog,
+                created_at: c.startTime.toISOString(),
+                completed_at: endTime.toISOString()
+            });
+
+            this.logAction('Прошел квиз "' + c.data.title + '" на ' + addedScore + ' очк.');
+
+            const newPts = (this.user.points || 0) + addedScore;
+            this.user.points = newPts;
+            document.getElementById('user-total-score').textContent = newPts;
+            
+            this.closeQuiz();
+            this.loadQuizzes();
+        } catch(e) {
+            console.error(e);
+            alert("Ошибка сохранения результатов");
+            if (btn) btn.disabled = false;
+        }
     },
 
     closeQuiz() {
@@ -639,9 +679,11 @@ const app = {
         const desc = document.getElementById('upload-desc').value;
         if(!file || !desc) return alert("Выберите фото и добавьте подпись");
 
-        const btn = document.querySelector('#upload-modal button.bg-secondary');
-        btn.textContent = "Загрузка...";
-        btn.disabled = true;
+        const btn = document.querySelector('#upload-modal button[onclick="app.submitReel()"]');
+        if (btn) {
+            btn.textContent = "Загрузка...";
+            btn.disabled = true;
+        }
 
         try {
             const ext = file.name.split('.').pop();
@@ -670,8 +712,10 @@ const app = {
             console.error(e);
             alert("Ошибка загрузки");
         } finally {
-            btn.textContent = "Отправить на модерацию";
-            btn.disabled = false;
+            if (btn) {
+                btn.textContent = "Отправить на модерацию";
+                btn.disabled = false;
+            }
             this.pendingUploadFile = null;
         }
     },
@@ -679,49 +723,59 @@ const app = {
     async toggleLike(photo_id) {
         const el = document.getElementById(`like-icon-${photo_id}`);
         const countEl = document.getElementById(`like-count-${photo_id}`);
+        if (!el) return;
         const isLiked = el.style.fontVariationSettings.includes('1');
         const myId = this.user.tg_id;
 
-        // Optimistically update UI first
-        if(isLiked) {
-            el.style.color = 'white';
-            el.style.fontVariationSettings = "'FILL' 0";
-        } else {
-            el.style.color = '#ffb4ab';
-            el.style.fontVariationSettings = "'FILL' 1";
-            el.style.transform = 'scale(1.3)';
-            setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+        if (el.dataset.locked === 'true') return;
+        el.dataset.locked = 'true';
+
+        try {
+            if(isLiked) {
+                el.style.color = 'white';
+                el.style.fontVariationSettings = "'FILL' 0";
+            } else {
+                el.style.color = '#ffb4ab';
+                el.style.fontVariationSettings = "'FILL' 1";
+                el.style.transform = 'scale(1.3)';
+                setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+            }
+
+            const { data: row } = await supabaseClient.from('gallery').select('likes').eq('id', photo_id).single();
+            let currentLikes = Array.isArray(row?.likes) ? [...row.likes] : [];
+
+            if(isLiked) {
+                currentLikes = currentLikes.filter(id => id !== myId);
+            } else {
+                if(!currentLikes.includes(myId)) currentLikes.push(myId);
+                this.logAction('Оценил фото #' + photo_id);
+            }
+
+            await supabaseClient.from('gallery').update({ likes: currentLikes }).eq('id', photo_id);
+            if(countEl) countEl.textContent = currentLikes.length > 0 ? currentLikes.length : '';
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setTimeout(() => { el.dataset.locked = 'false'; }, 500);
         }
-
-        // Read current likes array from DB
-        const { data: row } = await supabaseClient.from('gallery').select('likes').eq('id', photo_id).single();
-        let currentLikes = Array.isArray(row?.likes) ? [...row.likes] : [];
-
-        if(isLiked) {
-            currentLikes = currentLikes.filter(id => id !== myId);
-        } else {
-            if(!currentLikes.includes(myId)) currentLikes.push(myId);
-        }
-
-        await supabaseClient.from('gallery').update({ likes: currentLikes }).eq('id', photo_id);
-
-        // Update counter
-        if(countEl) countEl.textContent = currentLikes.length > 0 ? currentLikes.length : '';
     },
 
     async saveBookmark(photo_id) {
-        let el = document.getElementById(`bm-icon-${photo_id}`);
-        if(el) {
-            el.classList.add('text-secondary', 'fill-icon');
-            el.classList.remove('text-white');
-            el.style.fontVariationSettings = "'FILL' 1";
-        }
-        await supabaseClient.from('bookmarks').insert({ user_id: this.user.tg_id, photo_id: photo_id });
-        if(window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred) {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-        } else {
-            alert("Добавлено в закладки!");
-        }
+        try {
+            let el = document.getElementById(`bm-icon-${photo_id}`);
+            if(el) {
+                el.classList.add('text-secondary', 'fill-icon');
+                el.classList.remove('text-white');
+                el.style.fontVariationSettings = "'FILL' 1";
+            }
+            await supabaseClient.from('bookmarks').insert({ user_id: this.user.tg_id, photo_id: photo_id });
+            this.logAction('Добавил фото #' + photo_id + ' в закладки');
+            if(window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            } else {
+                alert("Добавлено в закладки!");
+            }
+        } catch (e) { console.error(e); }
     },
 
     openBookmarks() {
@@ -798,9 +852,9 @@ const app = {
             btn.style.color = '#26233a';
             btn.style.border = 'none';
         }
-        // Загрузить данные
         if (tabName === 'analytics') this.loadAnalytics();
         if (tabName === 'moderation') this.loadModerationFeed();
+        if (tabName === 'console') this.loadConsole();
     },
 
     // --- Admin ---
@@ -817,8 +871,12 @@ const app = {
         const file = fileInput ? fileInput.files[0] : null;
 
         const btn = e.target.querySelector('button[type="submit"]');
-        btn.disabled = true;
-        btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base">progress_activity</span> Публикация...`;
+        let originalText = '';
+        if (btn) {
+            btn.disabled = true;
+            originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-base">progress_activity</span> Публикация...`;
+        }
 
         try {
             let pubUrl = null;
@@ -837,6 +895,7 @@ const app = {
                 text_content: JSON.stringify({ title: t, content: txt })
             });
 
+            this.logAction('Опубликовал летопись: ' + t);
             alert('Запись опубликована!');
             e.target.reset();
             const label = document.getElementById('ac-file-label');
@@ -846,8 +905,10 @@ const app = {
         } catch(err) {
             alert("Ошибка публикации: " + err.message);
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = `<span class="material-symbols-outlined text-base" data-icon="publish">publish</span> Опубликовать`;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText || `<span class="material-symbols-outlined text-base" data-icon="publish">publish</span> Опубликовать`;
+            }
         }
     },
 
@@ -856,6 +917,9 @@ const app = {
         const t = document.getElementById('aq-title').value;
         const qJson = document.getElementById('aq-options-json').value;
         const durationHours = parseInt(document.getElementById('aq-duration-hours').value) || 24;
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
 
         try {
             let qObj = JSON.parse(qJson);
@@ -867,11 +931,14 @@ const app = {
                 questions: qObj,
                 end_time: endTimeIso
             });
+            this.logAction('Создал испытание: ' + t);
             alert('Квиз сохранен и уже запущен!');
             e.target.reset();
             this.loadQuizzes();
         } catch (err) {
-            alert('Неверный формат JSON');
+            alert('Неверный формат JSON или ошибка сохранения');
+        } finally {
+            if (btn) btn.disabled = false;
         }
     },
 
@@ -1248,6 +1315,85 @@ const app = {
             await supabaseClient.from('gallery').delete().eq('id', id);
         }
         this.loadModerationFeed();
+    },
+
+    // --- Admin: Console / Logs ---
+    async loadConsole() {
+        const list = document.getElementById('console-users-list');
+        if (!list) return;
+        list.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Сбор данных...</p>';
+
+        try {
+            const { data: users, error } = await supabaseClient.from('users').select('*, user_logs(action, created_at)').order('last_seen', { ascending: false, nullsFirst: false });
+            if (error) throw error;
+            
+            this.consoleUsersData = users || [];
+            this.filterConsoleUsers();
+        } catch (e) {
+            console.error(e);
+            list.innerHTML = '<p class="text-center text-error text-sm py-4">Ошибка загрузки. Создайте таблицу user_logs.</p>';
+        }
+    },
+
+    filterConsoleUsers() {
+        const query = (document.getElementById('console-search')?.value || '').toLowerCase();
+        const list = document.getElementById('console-users-list');
+        if (!list) return;
+
+        const filtered = this.consoleUsersData.filter(u => {
+            const name = u.full_name?.text?.toLowerCase() || '';
+            const tgid = u.tg_id?.toString() || '';
+            return name.includes(query) || tgid.includes(query);
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<p class="text-center text-on-surface-variant text-sm py-4">Никого не найдено</p>';
+            return;
+        }
+
+        const now = new Date();
+        list.innerHTML = '';
+
+        filtered.forEach(u => {
+            const name = u.full_name?.text || 'Неизвестно';
+            const logArr = Array.isArray(u.user_logs) ? u.user_logs.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 3) : [];
+            
+            let isOnline = false;
+            let seenText = 'Никогда';
+            if (u.last_seen) {
+                const ls = new Date(u.last_seen);
+                const diffMs = now - ls;
+                if (diffMs < 5 * 60 * 1000) isOnline = true; // 5 mins
+                seenText = ls.toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+            }
+
+            const currentTab = u.current_tab || 'неизвестно';
+
+            const card = document.createElement('div');
+            card.className = 'rounded-xl p-4 flex flex-col gap-2';
+            card.style.cssText = 'background:rgba(38,35,58,0.7);border:1px solid rgba(201,162,39,0.12);';
+            card.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-gray-500'}"></div>
+                            <span class="font-bold text-sm text-parchment">${name}</span>
+                        </div>
+                        <p class="text-xs mt-1" style="color:rgba(181,168,130,0.6);">ID: ${u.tg_id}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] uppercase tracking-wider" style="color:rgba(201,162,39,0.6);">Вкладка: ${currentTab}</p>
+                        <p class="text-xs" style="color:rgba(181,168,130,0.5);">${isOnline ? 'Онлайн' : 'Был(а): ' + seenText}</p>
+                    </div>
+                </div>
+                ${logArr.length > 0 ? `
+                <div class="mt-2 pt-2 border-t border-gold/10 space-y-1">
+                    <p class="text-[10px] uppercase font-bold text-parchment-dim/70 mb-1">Последние действия</p>
+                    ${logArr.map(l => `<p class="text-xs text-parchment/80">• ${l.action}</p>`).join('')}
+                </div>` : ''}
+            `;
+            list.appendChild(card);
+        });
     }
 };
 
