@@ -1144,10 +1144,12 @@ const app = {
                     <p class="text-sm font-bold truncate" style="color:#e8ddc4;">${name}</p>
                     <div class="flex gap-2 items-center text-xs" style="color:rgba(181,168,130,0.5);">
                         <span>${cls ? `Класс ${cls}` : ''}</span>
-                        ${timeStr ? `<span>• ⏱ ${timeStr}</span>` : ''}
                     </div>
                 </div>
-                <span class="font-bold text-sm shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${score} очк.</span>
+                <div class="flex flex-col items-end shrink-0">
+                    <span class="font-bold text-sm" style="color:#c9a227;font-family:'Cinzel',serif;">${score} очк.</span>
+                    ${timeStr ? `<span class="text-[10px]" style="color:rgba(181,168,130,0.6);">⏱ ${timeStr}</span>` : ''}
+                </div>
             </div>`;
         }).join('');
 
@@ -1212,13 +1214,13 @@ const app = {
                             timeStr = m > 0 ? `${m}м ${s%60}с` : `${s}с`;
                         }
                         return `
-                        <div class="flex flex-col">
-                            <div class="flex items-center gap-2">
-                                <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.'}</span>
-                                <span class="flex-1 text-sm truncate" style="color:#e8ddc4;">${userMap[r.user_id] || 'Участник'}</span>
-                                <span class="font-bold text-xs shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${r.score} очк.</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.'}</span>
+                            <span class="flex-1 text-sm truncate" style="color:#e8ddc4;">${userMap[r.user_id] || 'Участник'}</span>
+                            <div class="flex flex-col items-end shrink-0">
+                                <span class="font-bold text-xs" style="color:#c9a227;font-family:'Cinzel',serif;">${r.score} очк.</span>
+                                ${timeStr ? `<span class="text-[10px]" style="color:rgba(181,168,130,0.5);">⏱ ${timeStr}</span>` : ''}
                             </div>
-                            ${timeStr ? `<div class="text-[10px] pl-8 mt-0.5" style="color:rgba(181,168,130,0.5);">⏱ Время: ${timeStr}</div>` : ''}
                         </div>`;
                     }).join('')}
                 </div>
