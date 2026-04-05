@@ -718,6 +718,31 @@
         <img id="viewer-img" src="" class="w-full h-[100dvh] object-contain animate-fade-in" />
     </div>
 
+    <!-- ══ МОДАЛЬНОЕ ОКНО: ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ══ -->
+    <div id="user-profile-modal" class="fixed inset-0 z-[120] bg-black/85 backdrop-blur-sm hidden flex-col justify-end">
+        <div class="w-full rounded-t-3xl p-6 shadow-2xl relative animate-slide-up max-h-[80vh] flex flex-col"
+             style="background: linear-gradient(160deg, #3e345e, #2d2745); border-top: 1px solid rgba(201,162,39,0.2);">
+            <button onclick="app.closeUserProfile()"
+                    class="absolute top-4 right-4 text-parchment-dim/50 hover:text-parchment transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h2 class="font-headline text-lg text-gold-light mb-4 tracking-wide" id="up-name">Имя пользователя</h2>
+            
+            <div class="space-y-2 mb-4 shrink-0 text-sm font-body">
+                <p><span class="text-parchment-dim/60">ID:</span> <span id="up-id" class="text-parchment font-mono"></span></p>
+                <p><span class="text-parchment-dim/60">Класс:</span> <span id="up-class" class="text-parchment"></span></p>
+                <p><span class="text-parchment-dim/60">Статус:</span> <span id="up-role" class="text-parchment"></span></p>
+                <p><span class="text-parchment-dim/60">Был(а) в сети:</span> <span id="up-last-seen" class="text-parchment"></span></p>
+                <p><span class="text-parchment-dim/60">Фото-бан:</span> <span id="up-ban" class="text-parchment"></span></p>
+            </div>
+            
+            <h3 class="font-headline text-sm text-gold mb-2 tracking-wide shrink-0">Все действия:</h3>
+            <div id="up-logs-list" class="flex-1 overflow-y-auto w-full pr-2 space-y-2" style="scrollbar-width: thin; scrollbar-color: rgba(201,162,39,0.5) transparent;">
+                <!-- Logs here -->
+            </div>
+        </div>
+    </div>
+
     <!-- ══ ЭКРАН ЗАГРУЗКИ ══ -->
     <div id="screen-loading" class="absolute inset-0 z-[200] flex flex-col items-center justify-center transition-opacity duration-500"
          style="background: radial-gradient(ellipse at center, #2c224a 0%, #26233a 70%);">
@@ -734,7 +759,7 @@
         <p class="font-serif italic text-parchment-dim/40 text-xs mt-2">Наследие Амира Темура</p>
     </div>
 
-    <script src="app.js?v=4.5"></script>
+    <script src="app.js?v=5.1"></script>
 
 </body>
 </html>

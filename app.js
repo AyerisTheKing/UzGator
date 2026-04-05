@@ -234,6 +234,7 @@ const app = {
 
         this.currentTab = tabName;
         this.updatePresence(tabName);
+        this.logAction('Перешёл во вкладку: ' + tabName);
         
         if(tabName === 'chronicle') this.loadChronicle();
         if(tabName === 'quizzes') this.loadQuizzes();
@@ -293,6 +294,7 @@ const app = {
     },
 
     shareStory(titleText, descText, imgUrl) {
+        this.logAction('Сохранил/скачал запись: ' + titleText);
         const canvas = document.getElementById('story-canvas');
         const ctx = canvas.getContext('2d');
         const postImg = new Image();
@@ -508,6 +510,7 @@ const app = {
         if(alreadyDone) return alert("Вы уже прошли это испытание!");
         const quiz = this.cacheQuizzes.find(q => q.id === id);
         if(!quiz) return;
+        this.logAction('Начал испытание: ' + quiz.title);
         
         try {
             let parsedQ = typeof quiz.questions === 'string' ? JSON.parse(quiz.questions) : quiz.questions;
@@ -635,16 +638,16 @@ const app = {
             section.innerHTML = `
                 <!-- 9:16 Photo Container -->
                 <div class="relative w-full max-w-[calc(100dvh*9/16)] h-full overflow-hidden">
-                    <img alt="Reel" class="absolute inset-0 w-full h-full object-cover" src="${item.photo_url}"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                    <div class="relative w-full px-6 pb-32 flex justify-between items-end">
-                        <div class="max-w-[70%] mb-4">
+                    <img alt="Reel" class="absolute inset-0 w-full h-full object-contain" src="${item.photo_url}"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 w-full px-6 pb-32 flex justify-between items-end z-10 pointer-events-none">
+                        <div class="max-w-[70%] mb-4 pointer-events-auto">
                             <div class="flex items-center gap-3 mb-2">
                                 <p class="font-label font-bold text-sm text-secondary">@${userName.replace(/\s+/g,'_').toLowerCase()}</p>
                             </div>
                             <h2 class="font-headline italic text-xl text-white leading-tight drop-shadow-lg">${item.caption || ''}</h2>
                         </div>
-                        <div class="flex flex-col gap-6 items-center">
+                        <div class="flex flex-col gap-6 items-center pointer-events-auto">
                             <button class="group flex flex-col items-center gap-1" id="like-btn-${item.id}" onclick="app.toggleLike('${item.id}')">
                                 <div class="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transition-transform active:scale-125">
                                     <span class="material-symbols-outlined transition-all" id="like-icon-${item.id}"
@@ -699,6 +702,7 @@ const app = {
                 photo_url: data.publicUrl,
                 is_moderated: false
             });
+            this.logAction('Предложил новое фото на модерацию');
 
             document.getElementById('upload-modal').classList.add('hidden');
             document.getElementById('upload-desc').value = '';
@@ -746,6 +750,7 @@ const app = {
 
             if(isLiked) {
                 currentLikes = currentLikes.filter(id => id !== myId);
+                this.logAction('Убрал лайк с фото #' + photo_id);
             } else {
                 if(!currentLikes.includes(myId)) currentLikes.push(myId);
                 this.logAction('Оценил фото #' + photo_id);
@@ -855,6 +860,7 @@ const app = {
         if (tabName === 'analytics') this.loadAnalytics();
         if (tabName === 'moderation') this.loadModerationFeed();
         if (tabName === 'console') this.loadConsole();
+        this.logAction('Открыл админ-раздел: ' + tabName);
     },
 
     // --- Admin ---
@@ -985,6 +991,7 @@ const app = {
         btn.disabled = true;
         const { error } = await supabaseClient.from('posts').delete().eq('id', id);
         if (error) { alert('Ошибка удаления'); btn.disabled = false; return; }
+        this.logAction('Удалил запись летописи #' + id);
         btn.closest('div.flex').remove();
         this.loadChronicle();
     },
@@ -1310,9 +1317,11 @@ const app = {
     async modAction(id, action) {
         if(action === 'approve') {
             await supabaseClient.from('gallery').update({is_moderated: true}).eq('id', id);
+            this.logAction('Одобрил фото #' + id);
         } else {
             if (!confirm('Удалить это фото?')) return;
             await supabaseClient.from('gallery').delete().eq('id', id);
+            this.logAction('Отклонил/удалил фото #' + id);
         }
         this.loadModerationFeed();
     },
@@ -1389,11 +1398,52 @@ const app = {
                 ${logArr.length > 0 ? `
                 <div class="mt-2 pt-2 border-t border-gold/10 space-y-1">
                     <p class="text-[10px] uppercase font-bold text-parchment-dim/70 mb-1">Последние действия</p>
-                    ${logArr.map(l => `<p class="text-xs text-parchment/80">• ${l.action}</p>`).join('')}
+                    ${logArr.slice(0, 3).map(l => `<p class="text-xs text-parchment/80">• ${l.action}</p>`).join('')}
                 </div>` : ''}
             `;
+            // Активация профиля
+            card.className += ' cursor-pointer active:scale-95 transition-transform';
+            card.onclick = () => app.openUserProfile(u.tg_id);
+            
             list.appendChild(card);
         });
+    },
+
+    openUserProfile(tgId) {
+        const u = this.consoleUsersData.find(x => x.tg_id == tgId);
+        if (!u) return;
+
+        document.getElementById('up-name').textContent = u.full_name?.text || 'Неизвестно';
+        document.getElementById('up-id').textContent = u.tg_id;
+        document.getElementById('up-class').textContent = u.class_info ? u.class_info.num + u.class_info.letter : '—';
+        document.getElementById('up-role').textContent = u.is_admin ? 'Администратор' : 'Ученик';
+        document.getElementById('up-role').style.color = u.is_admin ? '#c44a5a' : '#e8ddc4';
+        
+        let seenText = 'Никогда';
+        if (u.last_seen) {
+            seenText = new Date(u.last_seen).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+        }
+        document.getElementById('up-last-seen').textContent = seenText;
+        document.getElementById('up-ban').textContent = u.is_banned_photo ? 'Забанен' : 'Нет';
+        document.getElementById('up-ban').style.color = u.is_banned_photo ? '#c44a5a' : '#e8ddc4';
+
+        const logArr = Array.isArray(u.user_logs) ? u.user_logs.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)) : [];
+        const logsHtml = logArr.map(l => {
+            const timeStr = l.created_at ? new Date(l.created_at).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : '';
+            return `<div class="p-2 rounded-lg" style="background:rgba(38,35,58,0.5);border:1px solid rgba(201,162,39,0.1);">
+                <p class="text-xs text-parchment mb-1">${l.action}</p>
+                <p class="text-[10px] text-parchment-dim/50">${timeStr}</p>
+            </div>`;
+        }).join('');
+        document.getElementById('up-logs-list').innerHTML = logsHtml || '<p class="text-xs text-parchment-dim/50">Нет действий</p>';
+
+        document.getElementById('user-profile-modal').classList.remove('hidden');
+        document.getElementById('user-profile-modal').classList.add('flex');
+    },
+
+    closeUserProfile() {
+        document.getElementById('user-profile-modal').classList.add('hidden');
+        document.getElementById('user-profile-modal').classList.remove('flex');
     }
 };
 
