@@ -478,7 +478,9 @@ const app = {
                 data: quiz,
                 questions: parsedQ,
                 index: 0,
-                score: 0
+                score: 0,
+                answersLog: {},
+                startTime: new Date()
             };
             document.getElementById('qm-title').textContent = quiz.title;
             this.renderQuizStep();
@@ -514,18 +516,26 @@ const app = {
 
     answerQuiz(selectedIdx, correctIdx) {
         const c = this.currentQuiz;
+        const qData = c.questions[c.index];
+        c.answersLog[`Вопрос ${c.index + 1}`] = `Ответ: ${qData.options[selectedIdx]}`;
+
         if(selectedIdx === correctIdx) c.score += 1;
         c.index++;
         this.renderQuizStep();
     },
 
     async submitQuizScore() {
-        const addedScore = this.currentQuiz.score * 10;
+        const c = this.currentQuiz;
+        const addedScore = c.score * 10;
+        const endTime = new Date();
+
         await supabaseClient.from('quiz_results').insert({
             user_id: this.user.tg_id,
-            quiz_id: this.currentQuiz.data.id,
+            quiz_id: c.data.id,
             score: addedScore,
-            answers_log: {}
+            answers_log: c.answersLog,
+            created_at: c.startTime.toISOString(),
+            completed_at: endTime.toISOString()
         });
 
         // Add to local UI points
@@ -909,7 +919,7 @@ const app = {
             supabaseClient.from('users').select('created_at', { count: 'exact' }),
             supabaseClient.from('gallery').select('id', { count: 'exact' }).eq('is_moderated', true),
             supabaseClient.from('quizzes').select('id', { count: 'exact' }),
-            supabaseClient.from('quiz_results').select('user_id, score, created_at, quiz_id', { count: 'exact' })
+            supabaseClient.from('quiz_results').select('user_id, score, created_at, completed_at, quiz_id', { count: 'exact' })
         ]);
 
         // Update stat cards
@@ -996,8 +1006,15 @@ const app = {
 
         // Aggregate scores per user
         const scoremap = {};
+        const timemap = {};
         resultsData.forEach(r => {
             scoremap[r.user_id] = (scoremap[r.user_id] || 0) + (r.score || 0);
+
+            // Calculate time taken
+            const start = r.created_at ? new Date(r.created_at).getTime() : 0;
+            const end = r.completed_at ? new Date(r.completed_at).getTime() : 0;
+            let duration = (start && end && end > start) ? (end - start) : 0;
+            timemap[r.user_id] = (timemap[r.user_id] || 0) + duration;
         });
 
         if (Object.keys(scoremap).length === 0) {
@@ -1011,8 +1028,12 @@ const app = {
         const userMap = {};
         if (usersData) usersData.forEach(u => { userMap[u.tg_id] = u; });
 
-        // Sort by score desc
-        const sorted = Object.entries(scoremap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        // Sort by score desc, then time asc
+        const sorted = Object.entries(scoremap).sort((a, b) => {
+            if (b[1] !== a[1]) return b[1] - a[1];
+            return (timemap[a[0]] || Infinity) - (timemap[b[0]] || Infinity);
+        }).slice(0, 10);
+        
         const medals = ['🥇', '🥈', '🥉'];
 
         dom.innerHTML = sorted.map(([uid, score], idx) => {
@@ -1021,12 +1042,25 @@ const app = {
             const cls = u?.class_info ? `${u.class_info.num}${u.class_info.letter}` : '';
             const medal = medals[idx] || `${idx + 1}.`;
             const isTop = idx < 3;
+            
+            // Format time for overall leaderboard
+            const userTime = timemap[uid] || 0;
+            let timeStr = '';
+            if (userTime > 0) {
+                const s = Math.floor(userTime / 1000);
+                const m = Math.floor(s / 60);
+                timeStr = m > 0 ? `${m}м ${s%60}с` : `${s}с`;
+            }
+
             return `
             <div class="flex items-center gap-3 p-3 rounded-xl" style="${isTop ? 'background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.1);' : ''}">
                 <span class="text-xl w-8 text-center shrink-0">${medal}</span>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold truncate" style="color:#e8ddc4;">${name}</p>
-                    <p class="text-xs" style="color:rgba(181,168,130,0.5);">${cls ? `Класс ${cls}` : ''}</p>
+                    <div class="flex gap-2 items-center text-xs" style="color:rgba(181,168,130,0.5);">
+                        <span>${cls ? `Класс ${cls}` : ''}</span>
+                        ${timeStr ? `<span>• ⏱ ${timeStr}</span>` : ''}
+                    </div>
                 </div>
                 <span class="font-bold text-sm shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${score} очк.</span>
             </div>`;
@@ -1056,21 +1090,38 @@ const app = {
         dom.innerHTML = '';
 
         quizzes.forEach(quiz => {
-            const quizResults = resultsData.filter(r => r.quiz_id === quiz.id).sort((a, b) => b.score - a.score).slice(0, 3);
+            const quizResults = resultsData.filter(r => r.quiz_id === quiz.id).sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                const aDuration = (a.completed_at && a.created_at) ? new Date(a.completed_at) - new Date(a.created_at) : Infinity;
+                const bDuration = (b.completed_at && b.created_at) ? new Date(b.completed_at) - new Date(b.created_at) : Infinity;
+                return aDuration - bDuration;
+            }).slice(0, 3);
             if (quizResults.length === 0) return;
 
             const section = document.createElement('div');
-            section.className = 'rounded-xl p-4';
+            section.className = 'rounded-xl p-4 mb-4';
             section.style.cssText = 'background:rgba(38,35,58,0.7);border:1px solid rgba(201,162,39,0.12);';
             section.innerHTML = `
                 <h3 class="font-headline text-sm mb-3 pb-2" style="color:#c9a227;border-bottom:1px solid rgba(201,162,39,0.2);">${quiz.title}</h3>
-                <div class="space-y-2">
-                    ${quizResults.map((r, idx) => `
-                    <div class="flex items-center gap-2">
-                        <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.  '}</span>
-                        <span class="flex-1 text-sm truncate" style="color:#e8ddc4;">${userMap[r.user_id] || 'Участник'}</span>
-                        <span class="font-bold text-xs shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${r.score} очк.</span>
-                    </div>`).join('')}
+                <div class="space-y-3">
+                    ${quizResults.map((r, idx) => {
+                        let duration = (r.completed_at && r.created_at) ? new Date(r.completed_at) - new Date(r.created_at) : 0;
+                        let timeStr = '';
+                        if (duration > 0) {
+                            const s = Math.floor(duration / 1000);
+                            const m = Math.floor(s / 60);
+                            timeStr = m > 0 ? `${m}м ${s%60}с` : `${s}с`;
+                        }
+                        return `
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base w-6 shrink-0">${medals[idx] || (idx+1)+'.'}</span>
+                                <span class="flex-1 text-sm truncate" style="color:#e8ddc4;">${userMap[r.user_id] || 'Участник'}</span>
+                                <span class="font-bold text-xs shrink-0" style="color:#c9a227;font-family:'Cinzel',serif;">${r.score} очк.</span>
+                            </div>
+                            ${timeStr ? `<div class="text-[10px] pl-8 mt-0.5" style="color:rgba(181,168,130,0.5);">⏱ Время: ${timeStr}</div>` : ''}
+                        </div>`;
+                    }).join('')}
                 </div>
             `;
             dom.appendChild(section);
