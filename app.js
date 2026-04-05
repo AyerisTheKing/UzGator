@@ -231,10 +231,10 @@ const app = {
             article.className = "group rounded-2xl overflow-hidden";
             article.style.cssText = "background:linear-gradient(145deg,#3b2f5c,#2d2745);border:1px solid rgba(201,162,39,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);";
             article.innerHTML = `
-                <div class="relative h-56 overflow-hidden">
-                    <img alt="Post cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="${sqImg}"/>
-                    <div class="absolute inset-0" style="background:linear-gradient(to top, #2d2745 0%, transparent 60%);"></div>
-                    <div class="absolute top-4 left-4 tag-chronicle">Летопись</div>
+                <div class="relative w-full aspect-[9/16] bg-black/40 overflow-hidden cursor-pointer" onclick="app.openPhotoViewer('${sqImg}')">
+                    <img alt="Post cover" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" src="${sqImg}"/>
+                    <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top, #2d2745 0%, transparent 60%);"></div>
+                    <div class="absolute top-4 left-4 tag-chronicle pointer-events-none">Летопись</div>
                 </div>
                 <div class="p-5">
                     <h2 class="font-headline text-xl font-bold mb-3 tracking-wide" style="color:#f5d67a;">${titleText}</h2>
