@@ -271,16 +271,25 @@ const app = {
             const article = document.createElement('article');
             article.className = "group rounded-2xl overflow-hidden";
             article.style.cssText = "background:linear-gradient(145deg,#3b2f5c,#2d2745);border:1px solid rgba(201,162,39,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.4);";
+            
+            const isLongText = contentText.length > 150;
+            const textHtml = `
+                <div class="mb-5 relative">
+                    <p class="font-serif leading-relaxed italic ${isLongText ? 'line-clamp-4' : ''} transition-all duration-300" style="color:rgba(232,221,196,0.8);font-size:0.9rem;">${contentText}</p>
+                    ${isLongText ? `<button class="text-gold mt-2 font-bold text-xs uppercase tracking-wider active:scale-95 hover:text-gold-light transition-colors" onclick="this.previousElementSibling.classList.remove('line-clamp-4'); this.remove();">Расширить</button>` : ''}
+                </div>
+            `;
+
             article.innerHTML = `
-                <div class="relative w-full aspect-[9/16] bg-black/40 overflow-hidden cursor-pointer" onclick="app.openPhotoViewer('${sqImg}')">
-                    <img alt="Post cover" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" src="${sqImg}"/>
+                <div class="relative w-full bg-black/40 overflow-hidden cursor-pointer" style="aspect-ratio: 9/16; transition: aspect-ratio 0.3s ease;" onclick="app.openPhotoViewer('${sqImg}')">
+                    <img alt="Post cover" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" src="${sqImg}" onload="this.parentElement.style.aspectRatio = this.naturalWidth > this.naturalHeight ? '16/9' : '9/16'"/>
                     <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top, #2d2745 0%, transparent 60%);"></div>
-                    <div class="absolute top-4 left-4 tag-chronicle pointer-events-none">Летопись</div>
+                    <div class="absolute top-4 left-4 pointer-events-none" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:4px 10px;border-radius:8px;border:1px solid rgba(201,162,39,0.3);color:#e8ddc4;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Летопись</div>
                 </div>
                 <div class="p-5">
                     <h2 class="font-headline text-xl font-bold mb-3 tracking-wide" style="color:#f5d67a;">${titleText}</h2>
                     <div class="gold-divider mb-3"></div>
-                    <p class="font-serif leading-relaxed italic mb-5 line-clamp-4" style="color:rgba(232,221,196,0.8);font-size:0.9rem;">${contentText}</p>
+                    ${textHtml}
                     <div class="flex items-center justify-between pt-3" style="border-top:1px solid rgba(201,162,39,0.1);">
                         <button class="btn-save-chronicle px-4 py-2 rounded-xl flex items-center gap-2 transition-all active:scale-95" onclick="app.shareStory('${sqTitle}', '${sqDesc}', '${sqImg}')">
                             <span class="material-symbols-outlined text-lg" data-icon="download">download</span>
